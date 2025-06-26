@@ -32,6 +32,7 @@ void Server::RecvPacket(int ClientSocket, unsigned short PacketLength)
 
 	Packet RecvPacket(std::move(Buffer), PacketLength);
 
+
 	return;
 }
 
