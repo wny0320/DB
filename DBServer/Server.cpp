@@ -36,6 +36,23 @@ void Server::RecvPacket(int ClientSocket, unsigned short PacketLength)
 	return;
 }
 
+void Server::RecvPacketCode()
+{
+	char PacketLengthChar[TOTAL_PACKET_SIZE] = { 0, };
+	unsigned short PacketLength = 0;
+
+	int RecvTotalByte = 0;
+	do
+	{
+		int RecvByte = recv(ClientSocket, PacketLengthChar + RecvTotalByte, TOTAL_PACKET_SIZE - RecvTotalByte, 0);
+		RecvTotalByte += RecvByte;
+	} while (RecvTotalByte < TOTAL_PACKET_SIZE);
+
+	PacketLength = ntohs(*reinterpret_cast<unsigned short*>(PacketLengthChar));
+
+	return PacketLength;
+}
+
 unsigned short Server::RecvPacketLength(int ClientSocket)
 {
 	char PacketLengthChar[TOTAL_PACKET_SIZE] = { 0, };

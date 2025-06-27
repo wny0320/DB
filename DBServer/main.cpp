@@ -1,47 +1,149 @@
-#include "Server.h"
+#include <iostream>
+#include <WinSock2.h>
+#include <vector>
+#include <unordered_map>
+#include "Packet.h"
+#include "Client.h"
 
 #pragma comment(lib, "ws2_32")
 
+#define SERVER_PORT 8080
+
 int main()
 {
-	//dll 파일 메모리에 적재
+	//ws2_32 dll Library Load To Memory
 	WSAData wsaData;
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	int Result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (Result != 0)
+	{
+		std::cerr << "WSAStartup Error" << std::endl;
+		return 1;
+	}
 
-	//Listen Socket 만들기
+	//Listen Socket Creation
 	sockaddr_in ListenSockAddr;
 	memset(&ListenSockAddr, 0, sizeof(ListenSockAddr));
 	ListenSockAddr.sin_family = AF_INET;
 	ListenSockAddr.sin_addr.s_addr = INADDR_ANY;
-	ListenSockAddr.sin_port = htons(8080);
+	ListenSockAddr.sin_port = htons(SERVER_PORT);
 
-	SOCKET ListenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	int BindResult = bind(ListenSock, (sockaddr*)&ListenSockAddr, sizeof(ListenSockAddr));
-	if (BindResult <= 0)
+	SOCKET ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (ListenSocket == INVALID_SOCKET)
 	{
-		std::cout << "Bind Error" << std::endl;
+		std::cerr << "Listen Socket Creation Error" << std::endl;
+		WSACleanup();
+		return 1;
 	}
+	//Listen Socket Bind
+	Result = bind(ListenSocket, (sockaddr*)&ListenSockAddr, sizeof(ListenSockAddr));
+	if (Result <= 0)
+	{
+		std::cerr << "Listen Socket Bind Error" << std::endl;
+		closesocket(ListenSocket);
+		WSACleanup();
+		return 1;
+	}
+	//Listen Socket Listen
+	Result = listen(ListenSocket, 5);
+	if (Result <= 0)
+	{
+		std::cerr << "Socket Listen Error" << std::endl;
+		closesocket(ListenSocket);
+		WSACleanup();
+		return 1;
+	}
+	//Socket Array Structure
+	fd_set MasterSet;
+	//Socket Is Saved By Client Class At Map
+	std::unordered_map<SOCKET, std::shared_ptr<Client>> ClientMap;
+	//Init fd_set
+	FD_ZERO(&MasterSet);
+	//ListenSocket Add To MasterSet
+	FD_SET(ListenSocket, &MasterSet);
 
-	int ListenResult = listen(ListenSock, 5);
-	if (ListenResult <= 0)
-	{
-		std::cout << "Listen Error" << std::endl;
-	}
 
 	while (true)
 	{
-		//Client Socket 만들기
-		sockaddr_in ClientSockAddr;
-		memset(&ClientSockAddr, 0, sizeof(ClientSockAddr));
-		int ClientSockAddrLength = sizeof(ClientSockAddr);
-		SOCKET ClientSock = accept(ListenSock, (sockaddr*)&ClientSockAddr, &ClientSockAddrLength);
-		if (ClientSock == INVALID_SOCKET)
+		//Select Func Will Change fd_set, MasterSet Must Be Used After Copyed.
+		fd_set ReadSet = MasterSet;
+
+		//Remove Socket That Not Changed From Socket Array
+		int SelectResult = select(0, &ReadSet, NULL, NULL, NULL);
+		if (SelectResult == SOCKET_ERROR)
 		{
-			std::cout << "Accept Error" << std::endl;
+			std::cerr << "Select TargetReadSocket Failed" << std::endl;
+			break;
+		}
+
+		//Find Changes Of ReadSet Array
+		if (FD_ISSET(ListenSocket, &ReadSet))
+		{
+			//Client Socket Creation
+			sockaddr_in ClientSockAddr;
+			memset(&ClientSockAddr, 0, sizeof(ClientSockAddr));
+			int ClientSockAddrLength = sizeof(ClientSockAddr);
+			SOCKET ClientSocket = accept(ListenSocket, (sockaddr*)&ClientSockAddr, &ClientSockAddrLength);
+			if (ClientSocket == INVALID_SOCKET)
+			{
+				std::cerr << "Client Accept Error" << std::endl;
+			}
+			else
+			{
+				//Client Class Creation
+				std::shared_ptr<Client> NewClient = std::make_shared<Client>(ClientSocket);
+
+				//NewClient Add To ClientMap
+				ClientMap[ClientSocket] = NewClient;
+
+				//ClientSocket Add To MasterSet
+				FD_SET(ClientSocket, &MasterSet);
+			}
+		}
+
+		//Each Socket In MasterSet's SocketArray
+		for (u_int i = 0; i < MasterSet.fd_count; ++i)
+		{
+			//Get Current Socket
+			SOCKET CurrentSocket = MasterSet.fd_array[i];
+
+			if (CurrentSocket == ListenSocket)
+			{
+				continue;
+			}
+
+			//If CurrenSocket Exist In ReadSet's SocketArray
+			if (FD_ISSET(CurrentSocket, &ReadSet))
+			{
+				//Find CurrenSocket At ClientMap
+				auto it = ClientMap.find(CurrentSocket);
+				if (it == ClientMap.end())
+				{
+					FD_CLR(CurrentSocket, &MasterSet);
+					continue;
+				}
+				std::shared_ptr<Client> MyClient = it->second;
+
+				char Buffer[MAX_PACKET_SIZE];
+				int BytesRecv = recv(MyClient->MySocket, Buffer, sizeof(Buffer), 0);
+				if (BytesRecv <= 0)
+				{
+					std::cout << "Client Disconnected. Socket : " << CurrentSocket << std::endl;
+					closesocket(CurrentSocket);
+					//Remove CurrentSocket From MasterSet's SocketArray
+					FD_CLR(CurrentSocket, &MasterSet);
+					ClientMap.erase(it);
+				}
+				else
+				{
+					MyClient->RecvBuffer.insert(MyClient->RecvBuffer.end(), Buffer, Buffer + BytesRecv);
+					std::cout << "Received Bytes : " << BytesRecv << " From Socket : " << MyClient->MySocket;
+				}
+			}
 		}
 	}
 
-	//dll 파일 메모리에서 삭제
+	closesocket(ListenSocket);
+	//ws2_32 dll Library Unload To Memory
 	WSACleanup();
 
 	return 0;

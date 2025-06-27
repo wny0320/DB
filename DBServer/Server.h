@@ -2,7 +2,6 @@
 
 #include <thread>
 #include <WinSock2.h>
-#include <vector>
 #include "Packet.h"
 
 class Server
@@ -22,5 +21,7 @@ public:
 	void RemoveSocket(int ClientSocket);
 private:
 	std::vector<SOCKET> SockVector;
+	std::vector<std::pair<SOCKET, EEventCode>> TaskVector;
+
 };
 

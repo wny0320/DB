@@ -1,11 +1,12 @@
 #pragma once
 
+#include <iostream>
+#include <WinSock2.h>
+#include <vector>
+
 static constexpr size_t TOTAL_PACKET_SIZE = 2;
 static constexpr size_t CODE_SIZE = 2;
 static constexpr size_t MAX_PACKET_SIZE = 4096;
-
-#include <iostream>
-#include <WinSock2.h>
 
 enum class EEventCode
 {
@@ -17,38 +18,35 @@ enum class EEventCode
 
 struct PlayerData
 {
+	bool IsSerializedFlag = false;
+	unsigned short PlayerId;
 
+	void Serialize()
+	{
+		IsSerializedFlag = true;
+		PlayerId = htons(PlayerId);
+		
+	}
+	void Deserialize()
+	{
+		IsSerializedFlag = false;
+		PlayerId = ntohs(PlayerId);
+	}
+	bool IsSerialized()
+	{
+		return IsSerializedFlag;
+	}
 };
 class Packet
 {
 public:
-	Packet(std::unique_ptr<char[]> InputSerialzedPacket = NULL, size_t InputSerialzedPacketSize = NULL);
-	char* GetSerialzedPacket();
+	Packet(std::vector<char> InputSerialzedPacket);
+	std::vector<char> GetSerialzedPacket();
 	size_t GetSerialzedPacketSize();
-	template<typename T>
 	bool SerializePacket(const T& PacketData);
 	EEventCode DeserializePacketCode();
 	std::unique_ptr<char[]> DeserializePacketData();
 private:
-	std::unique_ptr<char[]> SerialzedPacket;
+	T SerialzedPacket;
 	size_t SerialzedPacketSize;
-};
-
-template<typename T>
-inline bool Packet::SerializePacket(const T& PacketData)
-{
-	const size_t PacketSize = sizeof(T);
-	std::unique_ptr<char[]> Buffer = std::make_unique<char[]>(PacketSize);
-
-	std::memcpy(Buffer.get(), &PacketData, PacketSize);
-
-	SerialzedPacket = std::move(Buffer);
-	if (SerialzedPacket == NULL)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
 };
