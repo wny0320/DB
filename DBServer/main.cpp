@@ -55,7 +55,7 @@ int main()
 	//Socket Array Structure
 	fd_set MasterSet;
 	//Socket Is Saved By Client Class At Map
-	std::unordered_map<SOCKET, std::shared_ptr<Client>> ClientMap;
+	std::unordered_map<SOCKET, Client*> ClientMap;
 	//Init fd_set
 	FD_ZERO(&MasterSet);
 	//ListenSocket Add To MasterSet
@@ -90,7 +90,8 @@ int main()
 			else
 			{
 				//Client Class Creation
-				std::shared_ptr<Client> NewClient = std::make_shared<Client>(ClientSocket);
+				//Pointer Assign
+				Client* NewClient = new Client(ClientSocket);
 
 				//NewClient Add To ClientMap
 				ClientMap[ClientSocket] = NewClient;
@@ -121,7 +122,7 @@ int main()
 					FD_CLR(CurrentSocket, &MasterSet);
 					continue;
 				}
-				std::shared_ptr<Client> MyClient = it->second;
+				Client* MyClient = it->second;
 
 				char Buffer[MAX_PACKET_SIZE];
 				int BytesRecv = recv(MyClient->MySocket, Buffer, sizeof(Buffer), 0);
@@ -131,7 +132,11 @@ int main()
 					closesocket(CurrentSocket);
 					//Remove CurrentSocket From MasterSet's SocketArray
 					FD_CLR(CurrentSocket, &MasterSet);
+					//Remove Dynamic Obejct
+					delete it->second;
+					//Remove CurrentSocket From ClientMap
 					ClientMap.erase(it);
+
 				}
 				else
 				{
@@ -143,6 +148,14 @@ int main()
 	}
 
 	closesocket(ListenSocket);
+
+	//Remove Dynamic Objects When Code End
+	for (auto const& MyPair : ClientMap)
+	{
+		delete MyPair.second;
+	}
+	ClientMap.clear();
+
 	//ws2_32 dll Library Unload To Memory
 	WSACleanup();
 

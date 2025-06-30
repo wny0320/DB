@@ -9,5 +9,6 @@ public:
 	std::vector<char> RecvBuffer;
 
 	Client(SOCKET Sock) : MySocket(Sock){}
+	~Client();
 };
 
