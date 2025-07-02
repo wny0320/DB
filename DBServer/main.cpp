@@ -1,13 +1,13 @@
 #include <iostream>
 #include <WinSock2.h>
 #include <vector>
-#include <unordered_map>
 #include "Packet.h"
-#include "Client.h"
+#include "Server.h"
 
 #pragma comment(lib, "ws2_32")
 
-#define SERVER_PORT 8080
+#define SERVER_PORT 30303
+#define MAX_PACKET_SIZE	4096
 
 int main()
 {
@@ -54,8 +54,8 @@ int main()
 	}
 	//Socket Array Structure
 	fd_set MasterSet;
-	//Socket Is Saved By Client Class At Map
-	std::unordered_map<SOCKET, Client*> ClientMap;
+	//Create Server Instacne
+	Server* MainServer = new Server();
 	//Init fd_set
 	FD_ZERO(&MasterSet);
 	//ListenSocket Add To MasterSet
@@ -89,12 +89,8 @@ int main()
 			}
 			else
 			{
-				//Client Class Creation
-				//Pointer Assign
-				Client* NewClient = new Client(ClientSocket);
-
-				//NewClient Add To ClientMap
-				ClientMap[ClientSocket] = NewClient;
+				//NewClient Creation And Added To Server
+				MainServer->AddClient(ClientSocket);
 
 				//ClientSocket Add To MasterSet
 				FD_SET(ClientSocket, &MasterSet);
@@ -122,7 +118,7 @@ int main()
 					FD_CLR(CurrentSocket, &MasterSet);
 					continue;
 				}
-				Client* MyClient = it->second;
+				ClientData* MyClient = it->second;
 
 				char Buffer[MAX_PACKET_SIZE];
 				int BytesRecv = recv(MyClient->MySocket, Buffer, sizeof(Buffer), 0);
