@@ -1,6 +1,6 @@
 #include "Packet.h"
 
-Packet::Packet(PacketHeader* InputHeader, char* InputSerialzedPacket, PacketBodyBase* InputPacket)
+Packet::Packet(PacketHeader* InputHeader, PacketBodyBase* InputPacket, char* InputSerialzedPacket)
 {
 	Header = InputHeader;
 	EEventCode Code = (EEventCode)Header->PacketCode;

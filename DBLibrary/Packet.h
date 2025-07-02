@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#define MAX_PACKET_SIZE	4096
+
 enum class EEventCode : unsigned short
 {
 	CodeError = 0,	
@@ -24,12 +26,13 @@ enum class EEventCode : unsigned short
 
 struct PacketHeader
 {
+private:
+	bool IsSerializedFlag = false;
 public:
 	unsigned short PacketBodyLength;
 	unsigned short PacketCode;
-	bool IsSerializedFlag = false;
 
-	PacketHeader(unsigned short Length, EEventCode Code)
+	PacketHeader(unsigned short Length = 0, EEventCode Code = EEventCode::CodeError)
 	{
 		PacketBodyLength = Length;
 		PacketCode = (unsigned short)Code;
@@ -62,8 +65,9 @@ public:
 
 struct PacketBodyBase
 {
-public:
+protected:
 	bool IsSerializedFlag = false;
+public:
 	unsigned short PacketData;
 
 	virtual ~PacketBodyBase() = default;
@@ -115,7 +119,7 @@ public:
 class Packet
 {
 public:
-	Packet(PacketHeader* InputHeader, char* InputSerialzedPacket, PacketBodyBase* InputPacket = nullptr);
+	Packet(PacketHeader* InputHeader, PacketBodyBase* InputPacket = nullptr, char* InputSerialzedPacket = nullptr);
 	~Packet();
 	PacketBodyBase* Body;
 	PacketHeader* Header;

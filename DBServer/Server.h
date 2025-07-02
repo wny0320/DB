@@ -11,12 +11,12 @@ class Server
 public:
 	Server();
 	~Server();
-	std::vector<SOCKET> MyClientVector;
-	std::unordered_map<SOCKET, Packet*> MyTaskMap;
+	std::vector<SOCKET> SocketVector;
+	std::unordered_map<SOCKET, Packet*> RecvPacketMap;
 
-	void SendPacket(Packet* InputPacket);
-	void RecvPacket(SOCKET InputSocket, Packet* InputPacket);
-	void AddClient(SOCKET InputSocket);
-	void RemoveClient(SOCKET InputSocket);
+	void SendPacket(SOCKET InputSocket, Packet* InputPacket);
+	void RecvPacket(SOCKET InputSocket);
+	void AddSocket(SOCKET InputSocket);
+	void RemoveSocket(SOCKET InputSocket);
 };
 

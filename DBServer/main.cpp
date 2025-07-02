@@ -7,7 +7,6 @@
 #pragma comment(lib, "ws2_32")
 
 #define SERVER_PORT 30303
-#define MAX_PACKET_SIZE	4096
 
 int main()
 {
@@ -90,7 +89,7 @@ int main()
 			else
 			{
 				//NewClient Creation And Added To Server
-				MainServer->AddClient(ClientSocket);
+				MainServer->AddSocket(ClientSocket);
 
 				//ClientSocket Add To MasterSet
 				FD_SET(ClientSocket, &MasterSet);
@@ -112,7 +111,7 @@ int main()
 			if (FD_ISSET(CurrentSocket, &ReadSet))
 			{
 				//Find CurrenSocket At ClientMap
-				auto it = ClientMap.find(CurrentSocket);
+				auto it = MainServer->.find(CurrentSocket);
 				if (it == ClientMap.end())
 				{
 					FD_CLR(CurrentSocket, &MasterSet);
