@@ -1,9 +1,9 @@
 #pragma once
 
 #include <iostream>
-#include <WinSock2.h>
 #include <vector>
 #include <string>
+#include <arpa/inet.h> // For htons, ntohs on Linux
 
 #define MAX_PACKET_SIZE	4096
 

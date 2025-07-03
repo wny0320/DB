@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <unistd.h> // For close
+#include <errno.h>  // For errno
 
 #include "Server.h"
 #include "Packet.h"
@@ -15,14 +17,14 @@ Server::~Server()
 	}
 	RecvPacketMap.clear();
 
-	for (SOCKET s : SocketVector)
+	for (int s : SocketVector)
 	{
-		closesocket(s);
+		close(s);
 	}
 	SocketVector.clear();
 }
 
-void Server::SendPacket(SOCKET InSocket, Packet* InPacket)
+void Server::SendPacket(int InSocket, Packet* InPacket)
 {
 	if (InPacket->Header->IsSerialized() == false)
 	{
@@ -33,20 +35,20 @@ void Server::SendPacket(SOCKET InSocket, Packet* InPacket)
 		InPacket->Body->Serialize();
 	}
 	//Send Header
-	if (send(InSocket, (char*)InPacket->Header, sizeof(PacketHeader), 0) == SOCKET_ERROR)
+	if (send(InSocket, (char*)InPacket->Header, sizeof(PacketHeader), 0) < 0)
 	{
 		RemoveSocket(InSocket);
 		return;
 	}
 	//Send Body
-	if (send(InSocket, (char*)InPacket->Body, InPacket->Body->GetPacketBodySize(), 0) == SOCKET_ERROR)
+	if (send(InSocket, (char*)InPacket->Body, InPacket->Body->GetPacketBodySize(), 0) < 0)
 	{
 		RemoveSocket(InSocket);
 		return;
 	}
 }
 
-bool Server::RecvPacket(SOCKET InSocket)
+bool Server::RecvPacket(int InSocket)
 {
 	PacketHeader* NewHeader = new PacketHeader();
 	int RecvBytes = recv(InSocket, (char*)NewHeader, sizeof(PacketHeader), 0);
@@ -103,12 +105,12 @@ bool Server::RecvPacket(SOCKET InSocket)
 	return true;
 }
 
-void Server::AddSocket(SOCKET InSocket)
+void Server::AddSocket(int InSocket)
 {
 	SocketVector.push_back(InSocket);
 }
 
-void Server::RemoveSocket(SOCKET InSocket)
+void Server::RemoveSocket(int InSocket)
 {
 	auto It = std::find(SocketVector.begin(), SocketVector.end(), InSocket);
 	if (It != SocketVector.end())
@@ -123,5 +125,5 @@ void Server::RemoveSocket(SOCKET InSocket)
 		RecvPacketMap.erase(MapIt);
 	}
 
-	closesocket(InSocket);
+	close(InSocket);
 }

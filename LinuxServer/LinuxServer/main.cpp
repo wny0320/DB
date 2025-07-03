@@ -1,23 +1,20 @@
 #include <iostream>
-#include <WinSock2.h>
 #include <vector>
+#include <cstring> // For memset
+#include <sys/socket.h> // For socket, bind, listen, accept, send, recv
+#include <netinet/in.h> // For sockaddr_in, INADDR_ANY, htons
+#include <unistd.h>     // For close
+#include <arpa/inet.h>  // For htons, ntohs
+#include <sys/select.h> // For fd_set, select
+
 #include "Packet.h"
 #include "Server.h"
-
-#pragma comment(lib, "ws2_32")
 
 #define SERVER_PORT 30303
 
 int main()
 {
-	//ws2_32 dll Library Load To Memory
-	WSAData WsaData;
-	int Result = WSAStartup(MAKEWORD(2, 2), &WsaData);
-	if (Result != 0)
-	{
-		std::cerr << "WSAStartup Error" << std::endl;
-		return 1;
-	}
+	// No WSAStartup/WSACleanup needed for POSIX sockets
 
 	//Listen Socket Creation
 	sockaddr_in ListenSockAddr;
@@ -26,31 +23,39 @@ int main()
 	ListenSockAddr.sin_addr.s_addr = INADDR_ANY;
 	ListenSockAddr.sin_port = htons(SERVER_PORT);
 
-	SOCKET ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (ListenSocket == INVALID_SOCKET)
+	int ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (ListenSocket == -1) // INVALID_SOCKET is -1 in POSIX
 	{
 		std::cerr << "Listen Socket Creation Error" << std::endl;
-		WSACleanup();
 		return 1;
 	}
+
+	// Optional: Set SO_REUSEADDR to allow immediate reuse of the port
+    int optval = 1;
+    if (setsockopt(ListenSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
+        std::cerr << "setsockopt SO_REUSEADDR failed" << std::endl;
+        close(ListenSocket);
+        return 1;
+    }
+
 	//Listen Socket Bind
-	Result = bind(ListenSocket, (sockaddr*)&ListenSockAddr, sizeof(ListenSockAddr));
-	if (Result <= 0)
+	int Result = bind(ListenSocket, (sockaddr*)&ListenSockAddr, sizeof(ListenSockAddr));
+	if (Result == -1)
 	{
 		std::cerr << "Listen Socket Bind Error" << std::endl;
-		closesocket(ListenSocket);
-		WSACleanup();
+		close(ListenSocket);
 		return 1;
 	}
+
 	//Listen Socket Listen
 	Result = listen(ListenSocket, 5);
-	if (Result <= 0)
+	if (Result == -1)
 	{
 		std::cerr << "Socket Listen Error" << std::endl;
-		closesocket(ListenSocket);
-		WSACleanup();
+		close(ListenSocket);
 		return 1;
 	}
+
 	//Socket Array Structure
 	fd_set MasterSet;
 	//Create Server Instacne
@@ -60,6 +65,7 @@ int main()
 	//ListenSocket Add To MasterSet
 	FD_SET(ListenSocket, &MasterSet);
 
+	int MaxSocket = ListenSocket; // Track the highest-numbered file descriptor for select()
 
 	while (true)
 	{
@@ -67,8 +73,8 @@ int main()
 		fd_set ReadSet = MasterSet;
 
 		//Remove Socket That Not Changed From Socket Array
-		int SelectResult = select(0, &ReadSet, NULL, NULL, NULL);
-		if (SelectResult == SOCKET_ERROR)
+		int SelectResult = select(MaxSocket + 1, &ReadSet, NULL, NULL, NULL); // nfds is max_fd + 1
+		if (SelectResult == -1) // SOCKET_ERROR is -1 in POSIX
 		{
 			std::cerr << "Select TargetReadSocket Failed" << std::endl;
 			break;
@@ -80,9 +86,9 @@ int main()
 			//Client Socket Creation
 			sockaddr_in ClientSockAddr;
 			memset(&ClientSockAddr, 0, sizeof(ClientSockAddr));
-			int ClientSockAddrLength = sizeof(ClientSockAddr);
-			SOCKET ClientSocket = accept(ListenSocket, (sockaddr*)&ClientSockAddr, &ClientSockAddrLength);
-			if (ClientSocket == INVALID_SOCKET)
+			socklen_t ClientSockAddrLength = sizeof(ClientSockAddr); // socklen_t for POSIX accept
+			int ClientSocket = accept(ListenSocket, (sockaddr*)&ClientSockAddr, &ClientSockAddrLength);
+			if (ClientSocket == -1) // INVALID_SOCKET is -1 in POSIX
 			{
 				std::cerr << "Client Accept Error" << std::endl;
 			}
@@ -93,6 +99,11 @@ int main()
 
 				//ClientSocket Add To MasterSet
 				FD_SET(ClientSocket, &MasterSet);
+				// Update MaxSocket if new client socket is higher
+				if (ClientSocket > MaxSocket)
+				{
+					MaxSocket = ClientSocket;
+				}
 				std::cout << "New Client Connected. Socket : " << ClientSocket << std::endl;
 			}
 		}
@@ -100,8 +111,8 @@ int main()
 		//Each Socket In MasterSet's SocketArray
 		// Create a copy of the socket vector to iterate over safely
         // because RecvPacket might trigger RemoveSocket, which modifies the vector.
-		std::vector<SOCKET> SocketsToCheck = MainServer->SocketVector;
-		for (SOCKET CurrentSocket : SocketsToCheck)
+		std::vector<int> SocketsToCheck = MainServer->SocketVector;
+		for (int CurrentSocket : SocketsToCheck)
 		{
 			//If CurrenSocket Exist In ReadSet's SocketArray
 			if (FD_ISSET(CurrentSocket, &ReadSet))
@@ -114,18 +125,29 @@ int main()
                     // We just need to remove it from the master set for select().
 					FD_CLR(CurrentSocket, &MasterSet);
 					std::cout << "Client Disconnected. Socket : " << CurrentSocket << std::endl;
+					// Re-calculate MaxSocket if the disconnected socket was the max
+					if (CurrentSocket == MaxSocket)
+					{
+						MaxSocket = ListenSocket;
+						for (int s : MainServer->SocketVector)
+						{
+							if (s > MaxSocket)
+							{
+								MaxSocket = s;
+							}
+						}
+					}
 				}
 			}
 		}
 	}
 
-	closesocket(ListenSocket);
+	close(ListenSocket);
 
 	//Remove Dynamic Objects When Code End
 	delete MainServer;
 
-	//ws2_32 dll Library Unload To Memory
-	WSACleanup();
+	// No WSACleanup needed for POSIX sockets
 
 	return 0;
 }

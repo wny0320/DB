@@ -14,9 +14,9 @@ public:
 	std::vector<SOCKET> SocketVector;
 	std::unordered_map<SOCKET, Packet*> RecvPacketMap;
 
-	void SendPacket(SOCKET InputSocket, Packet* InputPacket);
-	void RecvPacket(SOCKET InputSocket);
-	void AddSocket(SOCKET InputSocket);
-	void RemoveSocket(SOCKET InputSocket);
+	void SendPacket(SOCKET InSocket, Packet* InPacket);
+	bool RecvPacket(SOCKET InSocket);
+	void AddSocket(SOCKET InSocket);
+	void RemoveSocket(SOCKET InSocket);
 };
 
