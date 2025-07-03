@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <arpa/inet.h> // For htons, ntohs on Linux
+#include <cstring> // For memcpy
 
 #define MAX_PACKET_SIZE	4096
 
