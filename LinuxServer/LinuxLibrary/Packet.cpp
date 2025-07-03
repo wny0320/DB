@@ -1,4 +1,5 @@
 #include "Packet.h"
+#include <cstring> // For memcpy
 
 Packet::Packet(PacketHeader* InHeader, PacketBodyBase* InPacket, char* InSerialzedPacket)
 {
@@ -18,11 +19,13 @@ Packet::Packet(PacketHeader* InHeader, PacketBodyBase* InPacket, char* InSerialz
 
 			break;
 		case EEventCode::GetPlayerData:
-			PlayerData* Data = new PlayerData();
-			memcpy(Data, InSerialzedPacket, sizeof(PlayerData));
-			Data->Deserialize();
-			Body = Data;
-			delete[] InSerialzedPacket;
+			{
+				PlayerData* Data = new PlayerData();
+				memcpy(Data, InSerialzedPacket, sizeof(PlayerData));
+				Data->Deserialize();
+				Body = Data;
+				delete[] InSerialzedPacket;
+			}
 			break;
 		case EEventCode::Max:
 			break;
