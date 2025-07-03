@@ -68,8 +68,6 @@ struct PacketBodyBase
 protected:
 	bool bIsSerialized = false;
 public:
-	unsigned short PacketData;
-
 	virtual ~PacketBodyBase() = default;
 	virtual void Serialize() = 0;
 	virtual void Deserialize() = 0;
@@ -81,7 +79,7 @@ public:
 struct PlayerData : PacketBodyBase
 {
 public:
-	unsigned short PlayerId;
+	uint64_t PlayerId;
 
 	virtual void Serialize() override
 	{
@@ -90,7 +88,7 @@ public:
 			return;
 		}
 		bIsSerialized = true;
-		PlayerId = htons(PlayerId);
+		PlayerId = htonll(PlayerId);
 	}
 	virtual void Deserialize() override
 	{
@@ -99,7 +97,7 @@ public:
 			return;
 		}
 		bIsSerialized = false;
-		PlayerId = ntohs(PlayerId);
+		PlayerId = ntohll(PlayerId);
 	}
 	unsigned short GetPlayerId() const
 	{

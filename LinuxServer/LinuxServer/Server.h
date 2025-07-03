@@ -21,4 +21,11 @@ public:
 	bool RecvPacket(int InSocket);
 	void AddSocket(int InSocket);
 	void RemoveSocket(int InSocket);
+
+private:
+	sql::Driver* Driver;
+	sql::Connection* Connection;
+
+	bool InitializeDatabase();
+	bool GetPlayerDataFromDB(unsigned short InPlayerId, PlayerData& OutPlayerData);
 };

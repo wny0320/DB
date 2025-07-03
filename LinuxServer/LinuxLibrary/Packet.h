@@ -82,7 +82,7 @@ public:
 struct PlayerData : PacketBodyBase
 {
 public:
-	unsigned short PlayerId;
+	int PlayerId; // Changed to int
 
 	// Constructor to initialize from serialized data
 	PlayerData(char* InSerializedData = nullptr)
@@ -102,7 +102,7 @@ public:
 			return;
 		}
 		bIsSerialized = true;
-		PlayerId = htons(PlayerId);
+		PlayerId = htonl(PlayerId); // Changed to htonl
 	}
 	virtual void Deserialize() override
 	{
@@ -111,9 +111,9 @@ public:
 			return;
 		}
 		bIsSerialized = false;
-		PlayerId = ntohs(PlayerId);
+		PlayerId = ntohl(PlayerId); // Changed to ntohl
 	}
-	unsigned short GetPlayerId() const
+	int GetPlayerId() const // Return type changed to int
 	{
 		return PlayerId;
 	}
