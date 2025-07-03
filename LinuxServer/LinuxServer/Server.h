@@ -7,7 +7,15 @@
 #include <netinet/in.h> // For sockaddr_in, INADDR_ANY, htons
 #include <unistd.h>     // For close
 
-class Packet;
+// MySQL Connector/C++ Headers
+#include <mysql_connection.h>
+#include <mysql_driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
+
+#include "Packet.h" // Added to declare Packet and PlayerData
 
 class Server
 {
@@ -27,5 +35,5 @@ private:
 	sql::Connection* Connection;
 
 	bool InitializeDatabase();
-	bool GetPlayerDataFromDB(unsigned short InPlayerId, PlayerData& OutPlayerData);
+	bool GetPlayerDataFromDB(int InPlayerId, PlayerData& OutPlayerData); // Changed to int
 };

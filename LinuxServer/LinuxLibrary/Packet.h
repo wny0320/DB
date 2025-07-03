@@ -69,8 +69,6 @@ struct PacketBodyBase
 protected:
 	bool bIsSerialized = false;
 public:
-	unsigned short PacketData;
-
 	virtual ~PacketBodyBase() = default;
 	virtual void Serialize() = 0;
 	virtual void Deserialize() = 0;
@@ -83,17 +81,14 @@ struct PlayerData : PacketBodyBase
 {
 public:
 	int PlayerId; // Changed to int
+	char Username[101]; // Added as fixed-size char array
+	unsigned int PlayerHp; // Added
+	unsigned int PlayerStamina; // Added
 
-	// Constructor to initialize from serialized data
-	PlayerData(char* InSerializedData = nullptr)
-	{
-		if (InSerializedData)
-		{
-			// Directly copy the bytes. This assumes the serialized data
-			// has the same layout as PlayerData. Be cautious with this.
-			memcpy(this, InSerializedData, sizeof(PlayerData));
-		}
-	}
+	// Default constructor
+	PlayerData() : PlayerId(0), PlayerHp(0), PlayerStamina(0) {
+        memset(Username, 0, sizeof(Username)); // Initialize char array
+    }
 
 	virtual void Serialize() override
 	{
@@ -103,6 +98,8 @@ public:
 		}
 		bIsSerialized = true;
 		PlayerId = htonl(PlayerId); // Changed to htonl
+		PlayerHp = htonl(PlayerHp); // Added
+		PlayerStamina = htonl(PlayerStamina); // Added
 	}
 	virtual void Deserialize() override
 	{
@@ -112,6 +109,8 @@ public:
 		}
 		bIsSerialized = false;
 		PlayerId = ntohl(PlayerId); // Changed to ntohl
+		PlayerHp = ntohl(PlayerHp); // Added
+		PlayerStamina = ntohl(PlayerStamina); // Added
 	}
 	int GetPlayerId() const // Return type changed to int
 	{
@@ -121,7 +120,7 @@ public:
 	{
 		return bIsSerialized;
 	}
-	virtual size_t GetPacketBodySize() const
+	virtual size_t GetPacketBodySize() const override
 	{
 		return sizeof(PlayerData);
 	}

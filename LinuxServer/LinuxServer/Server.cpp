@@ -16,8 +16,8 @@
 
 Server::Server()
 {
-	Driver = get_driver_instance();
-	Connection = nullptr;
+	this->Driver = get_driver_instance();
+	this->Connection = nullptr;
 	InitializeDatabase();
 }
 
@@ -35,9 +35,9 @@ Server::~Server()
 	}
 	SocketVector.clear();
 
-	if (Connection)
+	if (this->Connection)
 	{
-		delete Connection;
+		delete this->Connection;
 	}
 }
 
@@ -59,8 +59,8 @@ bool Server::InitializeDatabase()
 
 	try
 	{
-		Connection = Driver->connect(dbUrl, dbUser, dbPass);
-		Connection->setSchema(dbName);
+		this->Connection = this->Driver->connect(dbUrl, dbUser, dbPass);
+		this->Connection->setSchema(dbName);
 		std::cout << "Successfully connected to RDS database!" << std::endl;
 		return true;
 	}
@@ -73,7 +73,7 @@ bool Server::InitializeDatabase()
 
 bool Server::GetPlayerDataFromDB(int InPlayerId, PlayerData& OutPlayerData)
 {
-	if (!Connection || Connection->isClosed())
+	if (!this->Connection || this->Connection->isClosed())
 	{
 		std::cerr << "Database connection is not open!" << std::endl;
 		return false;
@@ -84,14 +84,16 @@ bool Server::GetPlayerDataFromDB(int InPlayerId, PlayerData& OutPlayerData)
 		sql::PreparedStatement* pstmt;
 		sql::ResultSet* res;
 
-		pstmt = Connection->prepareStatement("SELECT PlayerID, Username, PlayerHp, PlayerStamina FROM Players WHERE PlayerID = ?");
+		pstmt = this->Connection->prepareStatement("SELECT PlayerID, Username, PlayerHp, PlayerStamina FROM Players WHERE PlayerID = ?");
 		pstmt->setInt(1, InPlayerId);
 		res = pstmt->executeQuery();
 
 		if (res->next())
 		{
 			OutPlayerData.PlayerId = res->getInt("PlayerID");
-			OutPlayerData.Username = res->getString("Username");
+			// For char arrays, use strncpy to copy and ensure null termination
+			strncpy(OutPlayerData.Username, res->getString("Username").c_str(), sizeof(OutPlayerData.Username) - 1);
+			OutPlayerData.Username[sizeof(OutPlayerData.Username) - 1] = '\0'; // Ensure null termination
 			OutPlayerData.PlayerHp = res->getUInt("PlayerHp");
 			OutPlayerData.PlayerStamina = res->getUInt("PlayerStamina");
 			delete res;
@@ -155,31 +157,27 @@ bool Server::RecvPacket(int InSocket)
 		NewBody = new PlayerData();
 		// Attempt to get data from DB
 		{
-			PlayerData TempPlayerData;
-			// Assuming the incoming packet body for GetPlayerData contains the PlayerId
-			// For now, we'll just use a dummy ID or assume it's in the header for testing.
-			// A proper implementation would deserialize the incoming packet body to get the ID.
-			// For demonstration, let's assume PlayerId is 1 for now.
-			int RequestedPlayerId = 1; // Placeholder, should come from incoming packet
+			// The incoming packet body for GetPlayerData should contain the PlayerId
+			// For now, we'll just use a dummy ID for demonstration.
+			int RequestedPlayerId = 1; // Placeholder, should come from incoming packet body
 
-			if (GetPlayerDataFromDB(RequestedPlayerId, TempPlayerData))
+			PlayerData RetrievedPlayerData; // Use a local PlayerData object
+			if (this->GetPlayerDataFromDB(RequestedPlayerId, RetrievedPlayerData))
 			{
-				// If data found, populate NewBody with TempPlayerData
-				// This part needs careful handling as NewBody is PacketBodyBase*
-				// and TempPlayerData is PlayerData.
-				// In a real scenario, you'd create a new PlayerData packet with the retrieved data.
-				PlayerData* RetrievedData = new PlayerData();
-				RetrievedData->PlayerId = TempPlayerData.PlayerId;
-				RetrievedData->Username = TempPlayerData.Username;
-				RetrievedData->PlayerHp = TempPlayerData.PlayerHp;
-				RetrievedData->PlayerStamina = TempPlayerData.PlayerStamina;
-				NewBody = RetrievedData;
+				// If data found, populate NewBody with RetrievedPlayerData
+				// Create a new PlayerData packet with the retrieved data.
+				PlayerData* DataFromDB = new PlayerData();
+				DataFromDB->PlayerId = RetrievedPlayerData.PlayerId;
+				strncpy(DataFromDB->Username, RetrievedPlayerData.Username, sizeof(DataFromDB->Username) - 1);
+				DataFromDB->Username[sizeof(DataFromDB->Username) - 1] = '\0';
+				DataFromDB->PlayerHp = RetrievedPlayerData.PlayerHp;
+				DataFromDB->PlayerStamina = RetrievedPlayerData.PlayerStamina;
+				NewBody = DataFromDB;
 			}
 			else
 			{
 				// Player not found or DB error, handle accordingly
-				delete NewBody; // Delete the initially created PlayerData()
-				NewBody = nullptr;
+				// NewBody remains nullptr, which will be handled by the subsequent if (NewBody == nullptr) block
 			}
 		}
 		break;
