@@ -83,6 +83,17 @@ struct PlayerData : PacketBodyBase
 public:
 	unsigned short PlayerId;
 
+	// Constructor to initialize from serialized data
+	PlayerData(char* InSerializedData = nullptr)
+	{
+		if (InSerializedData)
+		{
+			// Directly copy the bytes. This assumes the serialized data
+			// has the same layout as PlayerData. Be cautious with this.
+			memcpy(this, InSerializedData, sizeof(PlayerData));
+		}
+	}
+
 	virtual void Serialize() override
 	{
 		if (bIsSerialized == true)

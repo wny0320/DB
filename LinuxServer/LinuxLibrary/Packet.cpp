@@ -20,8 +20,7 @@ Packet::Packet(PacketHeader* InHeader, PacketBodyBase* InPacket, char* InSerialz
 			break;
 		case EEventCode::GetPlayerData:
 			{
-				PlayerData* Data = new PlayerData();
-				memcpy(Data, InSerialzedPacket, sizeof(PlayerData));
+				PlayerData* Data = new PlayerData(InSerialzedPacket);
 				Data->Deserialize();
 				Body = Data;
 				delete[] InSerialzedPacket;
