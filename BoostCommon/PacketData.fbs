@@ -1,0 +1,69 @@
+namespace PacketData;
+
+struct PlayerStat{
+	max_hp: uint8;
+	cur_hp: uint8;
+	range: uint8;
+	max_stamina: uint8;
+	cur_stamina: uint8;
+	move_speed: uint8;
+}
+
+enum MonsterType : byte{
+	Test = 0,
+
+}
+
+struct MonsterStat{
+	monster_type: MonsterType;
+	max_hp: uint8;
+	damage: uint8;
+	move_speed: uint8;
+}
+
+struct Level{
+	goal_money: uint32;
+	goal_round: uint8;
+}
+table C2S_MonsterData{
+	monster_type: MonsterType;
+}
+
+table S2C_MonsterData{
+	monster_stat: MonsterStat;
+}
+
+table C2S_SessionData{
+	session_id: uint32;
+}
+
+table S2C_SessionData{
+	session_id: uint32;
+	level: Level
+	all_player_id: [uint32];
+	usable_money: uint32;
+	now_round: uint8;
+}
+
+table C2S_PlayerData{
+	session_id: uint32;
+	player_id: uint32;
+}
+
+table S2C_PlayerData{
+	player_id: uint32;
+	player_stat: PlayerStat;
+}
+
+union PacketType{
+	C2S_SessionData,
+	S2C_SessionData,
+
+}
+
+table PacketData{
+	timestamp: uint64;
+	type: PacketType;
+}
+
+root_type PacketData;
