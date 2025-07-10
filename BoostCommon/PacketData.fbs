@@ -22,9 +22,20 @@ struct MonsterStat{
 }
 
 struct Level{
+	step: uint8;
 	goal_money: uint32;
 	goal_round: uint8;
 }
+
+table C2S_LevelData{
+	session_id: uint32;
+	step: uint8;
+}
+
+table S2C_LevelData{
+	level: Level;
+}
+
 table C2S_MonsterData{
 	monster_type: MonsterType;
 }
@@ -39,7 +50,7 @@ table C2S_SessionData{
 
 table S2C_SessionData{
 	session_id: uint32;
-	level: Level
+	step: uint8;
 	all_player_id: [uint32];
 	usable_money: uint32;
 	now_round: uint8;
@@ -56,8 +67,14 @@ table S2C_PlayerData{
 }
 
 union PacketType{
+	C2S_LevelData,
+	S2C_LevelData,
+	C2S_MonsterData,
+	S2C_MonsterData,
 	C2S_SessionData,
 	S2C_SessionData,
+	C2S_PlayerData,
+	S2C_PlayerData,
 
 }
 

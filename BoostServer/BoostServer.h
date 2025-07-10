@@ -1,24 +1,18 @@
 #pragma once
 
-#include <thread>
-#include <boost/asio.hpp>
-#include <unordered_map>
-#include <Common.h>
+#include <boost/thread/mutex.hpp>
+#include "Session.h"
 
-using boost::asio::ip::tcp;
-
-class Client;
-
-class BoostServer
-{
+class BoostServer {
 public:
-	BoostServer();
-	~BoostServer();
-	std::vector<Client> ClientVector;
+    BoostServer(boost::asio::io_context& io_context, short port);
 
-	void SendPacket(tcp::socket* InSocket);
-	bool RecvPacket(tcp::socket* InSocket);
-	void AddClient(tcp::socket* InSocket);
-	void RemoveClient(tcp::socket* InSocket);
+private:
+    void StartAccept();
+    void HandleAccept(boost::shared_ptr<Session> new_session, const boost::system::error_code& error);
+
+    boost::asio::io_context& io_context_;
+    tcp::acceptor acceptor_;
+    boost::mutex mtx_;
+    uint32_t id_count_ = 0;
 };
-
