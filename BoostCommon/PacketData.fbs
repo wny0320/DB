@@ -78,9 +78,9 @@ union PacketType{
 
 }
 
-table PacketData{
+table Packet{
 	timestamp: uint64;
 	type: PacketType;
 }
 
-root_type PacketData;
+root_type Packet;

@@ -45,8 +45,8 @@ struct C2S_PlayerDataBuilder;
 struct S2C_PlayerData;
 struct S2C_PlayerDataBuilder;
 
-struct PacketData;
-struct PacketDataBuilder;
+struct Packet;
+struct PacketBuilder;
 
 enum MonsterType : int8_t {
   MonsterType_Test = 0,
@@ -77,33 +77,51 @@ inline const char *EnumNameMonsterType(MonsterType e) {
 
 enum PacketType : uint8_t {
   PacketType_NONE = 0,
-  PacketType_C2S_SessionData = 1,
-  PacketType_S2C_SessionData = 2,
+  PacketType_C2S_LevelData = 1,
+  PacketType_S2C_LevelData = 2,
+  PacketType_C2S_MonsterData = 3,
+  PacketType_S2C_MonsterData = 4,
+  PacketType_C2S_SessionData = 5,
+  PacketType_S2C_SessionData = 6,
+  PacketType_C2S_PlayerData = 7,
+  PacketType_S2C_PlayerData = 8,
   PacketType_MIN = PacketType_NONE,
-  PacketType_MAX = PacketType_S2C_SessionData
+  PacketType_MAX = PacketType_S2C_PlayerData
 };
 
-inline const PacketType (&EnumValuesPacketType())[3] {
+inline const PacketType (&EnumValuesPacketType())[9] {
   static const PacketType values[] = {
     PacketType_NONE,
+    PacketType_C2S_LevelData,
+    PacketType_S2C_LevelData,
+    PacketType_C2S_MonsterData,
+    PacketType_S2C_MonsterData,
     PacketType_C2S_SessionData,
-    PacketType_S2C_SessionData
+    PacketType_S2C_SessionData,
+    PacketType_C2S_PlayerData,
+    PacketType_S2C_PlayerData
   };
   return values;
 }
 
 inline const char * const *EnumNamesPacketType() {
-  static const char * const names[4] = {
+  static const char * const names[10] = {
     "NONE",
+    "C2S_LevelData",
+    "S2C_LevelData",
+    "C2S_MonsterData",
+    "S2C_MonsterData",
     "C2S_SessionData",
     "S2C_SessionData",
+    "C2S_PlayerData",
+    "S2C_PlayerData",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNamePacketType(PacketType e) {
-  if (::flatbuffers::IsOutRange(e, PacketType_NONE, PacketType_S2C_SessionData)) return "";
+  if (::flatbuffers::IsOutRange(e, PacketType_NONE, PacketType_S2C_PlayerData)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesPacketType()[index];
 }
@@ -112,12 +130,36 @@ template<typename T> struct PacketTypeTraits {
   static const PacketType enum_value = PacketType_NONE;
 };
 
+template<> struct PacketTypeTraits<PacketData::C2S_LevelData> {
+  static const PacketType enum_value = PacketType_C2S_LevelData;
+};
+
+template<> struct PacketTypeTraits<PacketData::S2C_LevelData> {
+  static const PacketType enum_value = PacketType_S2C_LevelData;
+};
+
+template<> struct PacketTypeTraits<PacketData::C2S_MonsterData> {
+  static const PacketType enum_value = PacketType_C2S_MonsterData;
+};
+
+template<> struct PacketTypeTraits<PacketData::S2C_MonsterData> {
+  static const PacketType enum_value = PacketType_S2C_MonsterData;
+};
+
 template<> struct PacketTypeTraits<PacketData::C2S_SessionData> {
   static const PacketType enum_value = PacketType_C2S_SessionData;
 };
 
 template<> struct PacketTypeTraits<PacketData::S2C_SessionData> {
   static const PacketType enum_value = PacketType_S2C_SessionData;
+};
+
+template<> struct PacketTypeTraits<PacketData::C2S_PlayerData> {
+  static const PacketType enum_value = PacketType_C2S_PlayerData;
+};
+
+template<> struct PacketTypeTraits<PacketData::S2C_PlayerData> {
+  static const PacketType enum_value = PacketType_S2C_PlayerData;
 };
 
 bool VerifyPacketType(::flatbuffers::Verifier &verifier, const void *obj, PacketType type);
@@ -668,8 +710,8 @@ inline ::flatbuffers::Offset<S2C_PlayerData> CreateS2C_PlayerData(
   return builder_.Finish();
 }
 
-struct PacketData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef PacketDataBuilder Builder;
+struct Packet FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef PacketBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TIMESTAMP = 4,
     VT_TYPE_TYPE = 6,
@@ -685,11 +727,29 @@ struct PacketData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     return GetPointer<const void *>(VT_TYPE);
   }
   template<typename T> const T *type_as() const;
+  const PacketData::C2S_LevelData *type_as_C2S_LevelData() const {
+    return type_type() == PacketData::PacketType_C2S_LevelData ? static_cast<const PacketData::C2S_LevelData *>(type()) : nullptr;
+  }
+  const PacketData::S2C_LevelData *type_as_S2C_LevelData() const {
+    return type_type() == PacketData::PacketType_S2C_LevelData ? static_cast<const PacketData::S2C_LevelData *>(type()) : nullptr;
+  }
+  const PacketData::C2S_MonsterData *type_as_C2S_MonsterData() const {
+    return type_type() == PacketData::PacketType_C2S_MonsterData ? static_cast<const PacketData::C2S_MonsterData *>(type()) : nullptr;
+  }
+  const PacketData::S2C_MonsterData *type_as_S2C_MonsterData() const {
+    return type_type() == PacketData::PacketType_S2C_MonsterData ? static_cast<const PacketData::S2C_MonsterData *>(type()) : nullptr;
+  }
   const PacketData::C2S_SessionData *type_as_C2S_SessionData() const {
     return type_type() == PacketData::PacketType_C2S_SessionData ? static_cast<const PacketData::C2S_SessionData *>(type()) : nullptr;
   }
   const PacketData::S2C_SessionData *type_as_S2C_SessionData() const {
     return type_type() == PacketData::PacketType_S2C_SessionData ? static_cast<const PacketData::S2C_SessionData *>(type()) : nullptr;
+  }
+  const PacketData::C2S_PlayerData *type_as_C2S_PlayerData() const {
+    return type_type() == PacketData::PacketType_C2S_PlayerData ? static_cast<const PacketData::C2S_PlayerData *>(type()) : nullptr;
+  }
+  const PacketData::S2C_PlayerData *type_as_S2C_PlayerData() const {
+    return type_type() == PacketData::PacketType_S2C_PlayerData ? static_cast<const PacketData::S2C_PlayerData *>(type()) : nullptr;
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -701,44 +761,68 @@ struct PacketData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   }
 };
 
-template<> inline const PacketData::C2S_SessionData *PacketData::type_as<PacketData::C2S_SessionData>() const {
+template<> inline const PacketData::C2S_LevelData *Packet::type_as<PacketData::C2S_LevelData>() const {
+  return type_as_C2S_LevelData();
+}
+
+template<> inline const PacketData::S2C_LevelData *Packet::type_as<PacketData::S2C_LevelData>() const {
+  return type_as_S2C_LevelData();
+}
+
+template<> inline const PacketData::C2S_MonsterData *Packet::type_as<PacketData::C2S_MonsterData>() const {
+  return type_as_C2S_MonsterData();
+}
+
+template<> inline const PacketData::S2C_MonsterData *Packet::type_as<PacketData::S2C_MonsterData>() const {
+  return type_as_S2C_MonsterData();
+}
+
+template<> inline const PacketData::C2S_SessionData *Packet::type_as<PacketData::C2S_SessionData>() const {
   return type_as_C2S_SessionData();
 }
 
-template<> inline const PacketData::S2C_SessionData *PacketData::type_as<PacketData::S2C_SessionData>() const {
+template<> inline const PacketData::S2C_SessionData *Packet::type_as<PacketData::S2C_SessionData>() const {
   return type_as_S2C_SessionData();
 }
 
-struct PacketDataBuilder {
-  typedef PacketData Table;
+template<> inline const PacketData::C2S_PlayerData *Packet::type_as<PacketData::C2S_PlayerData>() const {
+  return type_as_C2S_PlayerData();
+}
+
+template<> inline const PacketData::S2C_PlayerData *Packet::type_as<PacketData::S2C_PlayerData>() const {
+  return type_as_S2C_PlayerData();
+}
+
+struct PacketBuilder {
+  typedef Packet Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
   void add_timestamp(uint64_t timestamp) {
-    fbb_.AddElement<uint64_t>(PacketData::VT_TIMESTAMP, timestamp, 0);
+    fbb_.AddElement<uint64_t>(Packet::VT_TIMESTAMP, timestamp, 0);
   }
   void add_type_type(PacketData::PacketType type_type) {
-    fbb_.AddElement<uint8_t>(PacketData::VT_TYPE_TYPE, static_cast<uint8_t>(type_type), 0);
+    fbb_.AddElement<uint8_t>(Packet::VT_TYPE_TYPE, static_cast<uint8_t>(type_type), 0);
   }
   void add_type(::flatbuffers::Offset<void> type) {
-    fbb_.AddOffset(PacketData::VT_TYPE, type);
+    fbb_.AddOffset(Packet::VT_TYPE, type);
   }
-  explicit PacketDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  explicit PacketBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<PacketData> Finish() {
+  ::flatbuffers::Offset<Packet> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<PacketData>(end);
+    auto o = ::flatbuffers::Offset<Packet>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<PacketData> CreatePacketData(
+inline ::flatbuffers::Offset<Packet> CreatePacket(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint64_t timestamp = 0,
     PacketData::PacketType type_type = PacketData::PacketType_NONE,
     ::flatbuffers::Offset<void> type = 0) {
-  PacketDataBuilder builder_(_fbb);
+  PacketBuilder builder_(_fbb);
   builder_.add_timestamp(timestamp);
   builder_.add_type(type);
   builder_.add_type_type(type_type);
@@ -750,12 +834,36 @@ inline bool VerifyPacketType(::flatbuffers::Verifier &verifier, const void *obj,
     case PacketType_NONE: {
       return true;
     }
+    case PacketType_C2S_LevelData: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_LevelData *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketType_S2C_LevelData: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_LevelData *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketType_C2S_MonsterData: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_MonsterData *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketType_S2C_MonsterData: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_MonsterData *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
     case PacketType_C2S_SessionData: {
       auto ptr = reinterpret_cast<const PacketData::C2S_SessionData *>(obj);
       return verifier.VerifyTable(ptr);
     }
     case PacketType_S2C_SessionData: {
       auto ptr = reinterpret_cast<const PacketData::S2C_SessionData *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketType_C2S_PlayerData: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_PlayerData *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketType_S2C_PlayerData: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_PlayerData *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;
@@ -774,33 +882,33 @@ inline bool VerifyPacketTypeVector(::flatbuffers::Verifier &verifier, const ::fl
   return true;
 }
 
-inline const PacketData::PacketData *GetPacketData(const void *buf) {
-  return ::flatbuffers::GetRoot<PacketData::PacketData>(buf);
+inline const PacketData::Packet *GetPacket(const void *buf) {
+  return ::flatbuffers::GetRoot<PacketData::Packet>(buf);
 }
 
-inline const PacketData::PacketData *GetSizePrefixedPacketData(const void *buf) {
-  return ::flatbuffers::GetSizePrefixedRoot<PacketData::PacketData>(buf);
+inline const PacketData::Packet *GetSizePrefixedPacket(const void *buf) {
+  return ::flatbuffers::GetSizePrefixedRoot<PacketData::Packet>(buf);
 }
 
-inline bool VerifyPacketDataBuffer(
+inline bool VerifyPacketBuffer(
     ::flatbuffers::Verifier &verifier) {
-  return verifier.VerifyBuffer<PacketData::PacketData>(nullptr);
+  return verifier.VerifyBuffer<PacketData::Packet>(nullptr);
 }
 
-inline bool VerifySizePrefixedPacketDataBuffer(
+inline bool VerifySizePrefixedPacketBuffer(
     ::flatbuffers::Verifier &verifier) {
-  return verifier.VerifySizePrefixedBuffer<PacketData::PacketData>(nullptr);
+  return verifier.VerifySizePrefixedBuffer<PacketData::Packet>(nullptr);
 }
 
-inline void FinishPacketDataBuffer(
+inline void FinishPacketBuffer(
     ::flatbuffers::FlatBufferBuilder &fbb,
-    ::flatbuffers::Offset<PacketData::PacketData> root) {
+    ::flatbuffers::Offset<PacketData::Packet> root) {
   fbb.Finish(root);
 }
 
-inline void FinishSizePrefixedPacketDataBuffer(
+inline void FinishSizePrefixedPacketBuffer(
     ::flatbuffers::FlatBufferBuilder &fbb,
-    ::flatbuffers::Offset<PacketData::PacketData> root) {
+    ::flatbuffers::Offset<PacketData::Packet> root) {
   fbb.FinishSizePrefixed(root);
 }
 

@@ -12,7 +12,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="PacketData.fbs" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
