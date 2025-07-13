@@ -1,37 +1,29 @@
 #pragma once
 
-#define NOMINMAX
-#define _CRT_SECURE_NO_WARNINGS
-
-#include <iostream>
-#include <string>
 #include <memory>
+#include <string>
 #include <stdexcept>
-#include <mysqlx/xdevapi.h>
 
-#include "PacketData_generated.h"
+namespace sql {
+    class Connection;
+}
 
 class DatabaseManager
 {
 public:
-    // 싱글턴 인스턴스를 가져오는 static 함수
     static DatabaseManager& GetInstance();
 
-    // 데이터베이스 세션(연결) 객체를 반환하는 함수
-    mysqlx::Session& GetSession();
+    sql::Connection& GetConnection();
 
-    // 복사 및 대입을 막아 싱글턴 패턴을 유지
     DatabaseManager(const DatabaseManager&) = delete;
     void operator=(const DatabaseManager&) = delete;
 
 private:
-    // private 생성자: 외부에서 객체를 직접 생성하는 것을 막음
-    DatabaseManager();
+    DatabaseManager(); // private 생성자
 
-private:
-    std::unique_ptr<mysqlx::Session> Session; // DB 세션을 관리하는 스마트 포인터
+    std::unique_ptr<sql::Connection> connection;
 
-    // RDS 접속 정보
+    // RDS 접속 정보 (이 부분은 동일)
     std::string DbHost;
     int DbPort;
     std::string DbUser;
