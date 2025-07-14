@@ -1,10 +1,12 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "DatabaseManager.h"
 #include <cstdlib>
 #include <memory>
 
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/connection.h>
+#include <jdbc/cppconn/driver.h>
+#include <jdbc/cppconn/exception.h>
+#include <jdbc/cppconn/connection.h>
 
 DatabaseManager::DatabaseManager()
 {

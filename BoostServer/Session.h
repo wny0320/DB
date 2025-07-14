@@ -14,8 +14,8 @@ using boost::asio::ip::tcp;
 class Session : public boost::enable_shared_from_this<Session>
 {
 public:
-    Session(boost::asio::io_context& IoContext, uint32_t InId);
-
+    Session(boost::asio::io_context& IoContext, uint32_t InId) : Socket(IoContext), Id(InId) {}
+    void HandleNicknameCheckRequest(const std::string& nickname);
     tcp::socket& GetSocket();
     void Start();
 

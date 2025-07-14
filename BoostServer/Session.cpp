@@ -1,8 +1,45 @@
-#include "Session.h"
+#include <jdbc/cppconn//driver.h>
+#include <jdbc/cppconn/exception.h>
+#include <jdbc/cppconn/connection.h>
+#include <jdbc/cppconn/statement.h>
+#include <jdbc/cppconn/prepared_statement.h>
+#include <jdbc/cppconn/resultset.h>
 
-Session::Session(boost::asio::io_context& IoContext, uint32_t InId)
-    : Socket(IoContext), Id(InId)
+#include "Session.h"
+#include "DatabaseManager.h" 
+
+void Session::HandleNicknameCheckRequest(const std::string& nickname)
 {
+    bool isDuplicate = false;
+    try
+    {
+        // 1. DB 커넥션을 가져옵니다.
+        sql::Connection& con = DatabaseManager::GetInstance().GetConnection();
+
+        // 2. SQL 인젝션 공격을 방지하기 위해 PreparedStatement를 사용합니다.
+        std::unique_ptr<sql::PreparedStatement> pstmt(con.prepareStatement("SELECT COUNT(*) FROM users WHERE nickname = ?"));
+
+        // 3. '?' 자리에 실제 닉네임 값을 채워 넣습니다.
+        pstmt->setString(1, nickname);
+
+        // 4. 쿼리를 실행하고 결과를 받습니다.
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+
+        // 5. 결과 확인: COUNT(*)가 0보다 크면 중복입니다.
+        if (res->next() && res->getInt(1) > 0)
+        {
+            isDuplicate = true;
+        }
+    }
+    catch (sql::SQLException& e)
+    {
+        // DB 오류 처리
+        std::cerr << "DB Query Error: " << e.what() << std::endl;
+    }
+
+    // 6. 클라이언트에게 응답 패킷을 전송합니다.
+    // (이 부분은 사용하시는 패킷 프로토콜에 따라 구현합니다.)
+    // SendNicknameCheckResponse(isDuplicate);
 }
 
 tcp::socket& Session::GetSocket()

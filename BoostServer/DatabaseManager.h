@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 namespace sql {
     class Connection;
