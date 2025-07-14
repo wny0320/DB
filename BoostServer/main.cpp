@@ -6,7 +6,7 @@
 
 #include "PacketData_generated.h"
 
-#define SERVER_PORT 30303
+#define SERVER_PORT 32124
 #define THREAD_POOL_SIZE 4
 
 int main()
