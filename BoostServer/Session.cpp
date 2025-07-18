@@ -174,9 +174,28 @@ void Session::ProcessCreateSessionRequest(const PacketData::C2S_CreateSession* r
 
     con.setAutoCommit(true);
 
-    boost::asio::async_write(Socket, boost::asio::buffer(builder.GetBufferPointer(), builder.GetSize()),
-        boost::bind(&Session::HandleWrite, shared_from_this(),
-            boost::asio::placeholders::error));
+    // 7. 생성된 응답 패킷을 클라이언트에게 전송 (길이 헤더 추가)
+
+// [추가] 7-1. 패킷의 실제 크기와 헤더(4바이트)를 더한 전체 크기를 계산합니다.
+    int32_t packet_size_with_header = builder.GetSize() + 4;
+
+    // [추가] 7-2. 전송할 데이터를 담을 버퍼를 만듭니다.
+    //            shared_ptr를 사용하여 비동기 전송이 완료될 때까지 메모리가 안전하게 유지되도록 합니다.
+    auto send_buffer = std::make_shared<std::vector<uint8_t>>();
+    send_buffer->resize(packet_size_with_header); // 전체 크기만큼 버퍼를 할당합니다.
+
+    // [추가] 7-3. 버퍼의 맨 앞에 4바이트 길이 헤더를 복사합니다.
+    memcpy(send_buffer->data(), &packet_size_with_header, 4);
+
+    // [추가] 7-4. 헤더 바로 뒤에 실제 FlatBuffer 데이터를 복사합니다.
+    memcpy(send_buffer->data() + 4, builder.GetBufferPointer(), builder.GetSize());
+
+    // [수정] 7-5. 새로 만든 버퍼를 전송합니다.
+    boost::asio::async_write(Socket, boost::asio::buffer(*send_buffer),
+        // 람다를 사용하여 send_buffer가 전송 완료될 때까지 살아있도록 캡처합니다.
+        [self = shared_from_this(), send_buffer](const boost::system::error_code& ec, std::size_t) {
+            self->HandleWrite(ec);
+        });
 }
 
 void Session::ProcessJoinSessionRequest(const PacketData::C2S_JoinSession* req)
