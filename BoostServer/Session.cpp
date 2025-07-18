@@ -8,44 +8,52 @@
 #include <jdbc/cppconn/resultset.h>
 #include <memory> 
 #include <vector> 
-#include <cstdlib> // rand() 함수 사용을 위해 추가
+#include <cstdlib>
 
-// [복원된 함수] GetSocket() 함수의 실제 코드
-tcp::socket& Session::GetSocket()
-{
-    return Socket;
-}
-
-// [복원된 함수] Start() 함수의 실제 코드
 void Session::Start()
 {
     std::cout << "Client Connected. Session ID: " << Id << ", IP: " << ClientIP << std::endl;
-
-    // 클라이언트로부터 데이터를 비동기적으로 기다립니다.
     Socket.async_read_some(boost::asio::buffer(DataBuffer, MaxLength),
         boost::bind(&Session::HandleRead, shared_from_this(),
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
 }
 
-// [복원된 함수] HandleRead() 함수의 실제 코드
+// [수정] HandleRead 로직 전체 변경
 void Session::HandleRead(const boost::system::error_code& ErrorCode, size_t BytesTransferred)
 {
     if (!ErrorCode && BytesTransferred > 0)
     {
-        auto Verifier = flatbuffers::Verifier(reinterpret_cast<const uint8_t*>(DataBuffer), BytesTransferred);
+        // 1. 새로 받은 데이터를 ReadBuffer의 끝에 추가합니다.
+        ReadBuffer.insert(ReadBuffer.end(), DataBuffer, DataBuffer + BytesTransferred);
 
-        if (PacketData::VerifyPacketBuffer(Verifier))
+        const int32_t HeaderSize = 4; // 헤더 사이즈는 4바이트
+
+        // 2. 버퍼에 완전한 패킷이 하나 이상 존재할 수 있으므로, while 루프를 사용합니다.
+        while (ReadBuffer.size() >= HeaderSize)
         {
-            auto ReceivedPacket = PacketData::GetPacket(DataBuffer);
-            ProcessPacket(ReceivedPacket);
-        }
-        else
-        {
-            std::cerr << "Invalid FlatBuffers data received from Session ID: " << Id << std::endl;
+            // 3. 헤더에서 패킷 전체 길이를 읽습니다.
+            int32_t PacketLength = 0;
+            memcpy(&PacketLength, ReadBuffer.data(), HeaderSize);
+
+            // 4. 패킷이 완전히 도착했는지 확인합니다.
+            if (ReadBuffer.size() >= PacketLength)
+            {
+                // 5. 완전한 패킷의 '실제 데이터' 부분만 ProcessPacket으로 넘겨 처리합니다.
+                // (헤더를 제외한 데이터 시작점, 실제 데이터 길이)
+                ProcessPacket(ReadBuffer.data() + HeaderSize, PacketLength - HeaderSize);
+
+                // 6. 버퍼에서 처리한 패킷(헤더 포함)을 제거합니다.
+                ReadBuffer.erase(ReadBuffer.begin(), ReadBuffer.begin() + PacketLength);
+            }
+            else
+            {
+                // 아직 패킷이 다 도착하지 않음. 다음 read를 기다립니다.
+                break;
+            }
         }
 
-        // 다음 데이터를 계속 기다립니다.
+        // 다음 데이터를 계속해서 비동기적으로 기다립니다.
         Socket.async_read_some(boost::asio::buffer(DataBuffer, MaxLength),
             boost::bind(&Session::HandleRead, shared_from_this(),
                 boost::asio::placeholders::error,
@@ -53,27 +61,30 @@ void Session::HandleRead(const boost::system::error_code& ErrorCode, size_t Byte
     }
     else
     {
-        // 접속 종료 또는 오류 처리
         std::cerr << "Session Disconnected. ID: " << Id << ", Error: " << ErrorCode.message() << std::endl;
     }
 }
 
-// [복원된 함수] HandleWrite() 함수의 실제 코드
 void Session::HandleWrite(const boost::system::error_code& ErrorCode)
 {
-    if (!ErrorCode)
-    {
-        // 쓰기 완료. 보통 특별한 처리는 필요 없습니다.
-    }
-    else
+    if (ErrorCode)
     {
         std::cerr << "Write Error on Session ID " << Id << ": " << ErrorCode.message() << std::endl;
     }
 }
 
 // [수정 완료] ProcessPacket() 함수
-void Session::ProcessPacket(const PacketData::Packet* InPacket)
+void Session::ProcessPacket(const uint8_t* data, size_t size)
 {
+    auto Verifier = flatbuffers::Verifier(data, size);
+    if (!PacketData::VerifyPacketBuffer(Verifier))
+    {
+        // 이 로그는 이제 정말로 데이터가 손상되었을 때만 발생합니다.
+        std::cerr << "Invalid FlatBuffers data received from Session ID: " << Id << std::endl;
+        return;
+    }
+
+    auto InPacket = PacketData::GetPacket(data);
     switch (InPacket->packet_pay_load_type())
     {
     case PacketData::PacketPayload_C2S_CreateSession:
