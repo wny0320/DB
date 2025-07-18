@@ -1,72 +1,42 @@
-#include <jdbc/cppconn//driver.h>
+#include "Session.h"
+#include "DatabaseManager.h" 
+#include <jdbc/cppconn/driver.h>
 #include <jdbc/cppconn/exception.h>
 #include <jdbc/cppconn/connection.h>
 #include <jdbc/cppconn/statement.h>
 #include <jdbc/cppconn/prepared_statement.h>
 #include <jdbc/cppconn/resultset.h>
+#include <memory> 
+#include <vector> 
+#include <cstdlib> // rand() 함수 사용을 위해 추가
 
-#include "Session.h"
-#include "DatabaseManager.h" 
-
-void Session::HandleNicknameCheckRequest(const std::string& nickname)
-{
-    bool isDuplicate = false;
-    try
-    {
-        // 1. DB 커넥션을 가져옵니다.
-        sql::Connection& con = DatabaseManager::GetInstance().GetConnection();
-
-        // 2. SQL 인젝션 공격을 방지하기 위해 PreparedStatement를 사용합니다.
-        std::unique_ptr<sql::PreparedStatement> pstmt(con.prepareStatement("SELECT COUNT(*) FROM users WHERE nickname = ?"));
-
-        // 3. '?' 자리에 실제 닉네임 값을 채워 넣습니다.
-        pstmt->setString(1, nickname);
-
-        // 4. 쿼리를 실행하고 결과를 받습니다.
-        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
-
-        // 5. 결과 확인: COUNT(*)가 0보다 크면 중복입니다.
-        if (res->next() && res->getInt(1) > 0)
-        {
-            isDuplicate = true;
-        }
-    }
-    catch (sql::SQLException& e)
-    {
-        // DB 오류 처리
-        std::cerr << "DB Query Error: " << e.what() << std::endl;
-    }
-
-    // 6. 클라이언트에게 응답 패킷을 전송합니다.
-    // (이 부분은 사용하시는 패킷 프로토콜에 따라 구현합니다.)
-    // SendNicknameCheckResponse(isDuplicate);
-}
-
+// [복원된 함수] GetSocket() 함수의 실제 코드
 tcp::socket& Session::GetSocket()
 {
     return Socket;
 }
 
+// [복원된 함수] Start() 함수의 실제 코드
 void Session::Start()
 {
-    std::cout << "Client Connected. Session ID: " << Id << std::endl;
+    std::cout << "Client Connected. Session ID: " << Id << ", IP: " << ClientIP << std::endl;
 
+    // 클라이언트로부터 데이터를 비동기적으로 기다립니다.
     Socket.async_read_some(boost::asio::buffer(DataBuffer, MaxLength),
         boost::bind(&Session::HandleRead, shared_from_this(),
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
 }
 
+// [복원된 함수] HandleRead() 함수의 실제 코드
 void Session::HandleRead(const boost::system::error_code& ErrorCode, size_t BytesTransferred)
 {
-    if (!ErrorCode)
+    if (!ErrorCode && BytesTransferred > 0)
     {
         auto Verifier = flatbuffers::Verifier(reinterpret_cast<const uint8_t*>(DataBuffer), BytesTransferred);
 
-        // [변경] 버퍼 검증 함수가 VerifyPacketBuffer로 변경되었습니다.
         if (PacketData::VerifyPacketBuffer(Verifier))
         {
-            // [변경] 패킷을 가져오는 함수가 GetPacket으로 변경되었습니다.
             auto ReceivedPacket = PacketData::GetPacket(DataBuffer);
             ProcessPacket(ReceivedPacket);
         }
@@ -75,6 +45,7 @@ void Session::HandleRead(const boost::system::error_code& ErrorCode, size_t Byte
             std::cerr << "Invalid FlatBuffers data received from Session ID: " << Id << std::endl;
         }
 
+        // 다음 데이터를 계속 기다립니다.
         Socket.async_read_some(boost::asio::buffer(DataBuffer, MaxLength),
             boost::bind(&Session::HandleRead, shared_from_this(),
                 boost::asio::placeholders::error,
@@ -82,15 +53,17 @@ void Session::HandleRead(const boost::system::error_code& ErrorCode, size_t Byte
     }
     else
     {
+        // 접속 종료 또는 오류 처리
         std::cerr << "Session Disconnected. ID: " << Id << ", Error: " << ErrorCode.message() << std::endl;
     }
 }
 
+// [복원된 함수] HandleWrite() 함수의 실제 코드
 void Session::HandleWrite(const boost::system::error_code& ErrorCode)
 {
     if (!ErrorCode)
     {
-        // 쓰기 완료
+        // 쓰기 완료. 보통 특별한 처리는 필요 없습니다.
     }
     else
     {
@@ -98,33 +71,145 @@ void Session::HandleWrite(const boost::system::error_code& ErrorCode)
     }
 }
 
-// [변경] 함수의 인자 타입이 Packet*로 변경되었습니다.
+// [수정 완료] ProcessPacket() 함수
 void Session::ProcessPacket(const PacketData::Packet* InPacket)
 {
-    // InPacket의 타입은 이제 PacketData::Packet* 입니다.
-    switch (InPacket->type_type())
+    switch (InPacket->packet_pay_load_type())
     {
-    case PacketData::PacketType_C2S_SessionData:
+    case PacketData::PacketPayload_C2S_CreateSession:
     {
-        auto SessionData = static_cast<const PacketData::C2S_SessionData*>(InPacket->type_as_C2S_SessionData());
-        std::cout << "Received C2S_SessionData from Session ID " << Id << " with session_id: " << SessionData->session_id() << std::endl;
-
-        flatbuffers::FlatBufferBuilder Builder;
-        std::vector<uint32_t> PlayerIds = { 1, 2, 3 };
-        auto AllPlayerIdOffset = Builder.CreateVector(PlayerIds);
-
-        auto S2CSessionData = PacketData::CreateS2C_SessionData(Builder, SessionData->session_id(), 1, AllPlayerIdOffset, 1000, 1);
-
-        auto ResponsePacket = PacketData::CreatePacket(Builder, 0, PacketData::PacketType_S2C_SessionData, S2CSessionData.Union());
-        Builder.Finish(ResponsePacket);
-
-        boost::asio::async_write(Socket, boost::asio::buffer(Builder.GetBufferPointer(), Builder.GetSize()),
-            boost::bind(&Session::HandleWrite, shared_from_this(),
-                boost::asio::placeholders::error));
+        auto req = InPacket->packet_pay_load_as_C2S_CreateSession();
+        if (req) {
+            ProcessCreateSessionRequest(req);
+        }
         break;
     }
+    case PacketData::PacketPayload_C2S_JoinSession:
+    {
+        auto req = InPacket->packet_pay_load_as_C2S_JoinSession();
+        if (req) {
+            ProcessJoinSessionRequest(req);
+        }
+        break;
+    }
+    // 다른 패킷 타입 처리...
     default:
         std::cout << "Received unknown packet type from Session ID " << Id << std::endl;
         break;
     }
+}
+
+// [수정 완료] ProcessCreateSessionRequest() 함수
+void Session::ProcessCreateSessionRequest(const PacketData::C2S_CreateSession* req)
+{
+    std::string hostNickname = req->host_nickname()->str();
+    // 클라이언트가 보낸 IP 대신 서버가 저장한 IP를 사용합니다.
+    std::string hostIpAddress = this->ClientIP;
+
+    std::cout << "세션 생성 요청 | Nickname: " << hostNickname << ", IP: " << hostIpAddress << std::endl;
+
+    uint32_t newSessionId = 0;
+    flatbuffers::FlatBufferBuilder builder;
+
+    sql::Connection& con = DatabaseManager::GetInstance().GetConnection();
+    con.setAutoCommit(false);
+
+    try
+    {
+        std::unique_ptr<sql::PreparedStatement> pstmt_session(con.prepareStatement(
+            "INSERT INTO GameSessions (HostIPAddress, HostNickname) VALUES (?, ?)"));
+        pstmt_session->setString(1, hostIpAddress);
+        pstmt_session->setString(2, hostNickname);
+        pstmt_session->executeUpdate();
+
+        std::unique_ptr<sql::Statement> stmt(con.createStatement());
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT LAST_INSERT_ID()"));
+        if (!res->next()) {
+            throw std::runtime_error("Failed to get last insert ID.");
+        }
+        newSessionId = res->getUInt(1);
+
+        std::unique_ptr<sql::PreparedStatement> pstmt_player(con.prepareStatement(
+            "INSERT INTO SessionPlayers (SessionID, PlayerNickname) VALUES (?, ?)"));
+        pstmt_player->setUInt(1, newSessionId);
+        pstmt_player->setString(2, hostNickname);
+        pstmt_player->executeUpdate();
+
+        con.commit();
+
+        auto nickname_offset = builder.CreateString(hostNickname);
+        PacketData::Color player_color(rand() % 256, rand() % 256, rand() % 256);
+        auto player_info_obj = PacketData::CreatePlayerInfo(builder, 0, nickname_offset, &player_color, 100, 100, 10, 100, 100, 10);
+
+        std::vector<flatbuffers::Offset<PacketData::PlayerInfo>> players_vector;
+        players_vector.push_back(player_info_obj);
+        auto players_offset = builder.CreateVector(players_vector);
+
+        auto monsters_offset = builder.CreateVector<flatbuffers::Offset<PacketData::MonsterInfo>>({});
+        auto ip_addr_offset = builder.CreateString(hostIpAddress);
+
+        auto session_info_obj = PacketData::CreateSessionInfo(builder, newSessionId, ip_addr_offset, 1, players_offset, monsters_offset, 0, 1);
+        auto response_payload = PacketData::CreateS2C_CreateSessionResponse(builder, session_info_obj);
+
+        auto packet = PacketData::CreatePacket(builder, 0, PacketData::PacketPayload_S2C_CreateSessionResponse, response_payload.Union());
+        builder.Finish(packet);
+    }
+    catch (const sql::SQLException& e)
+    {
+        con.rollback();
+        std::cerr << "C2S_CreateSession DB Error: " << e.what() << std::endl;
+        return;
+    }
+
+    con.setAutoCommit(true);
+
+    boost::asio::async_write(Socket, boost::asio::buffer(builder.GetBufferPointer(), builder.GetSize()),
+        boost::bind(&Session::HandleWrite, shared_from_this(),
+            boost::asio::placeholders::error));
+}
+
+void Session::ProcessJoinSessionRequest(const PacketData::C2S_JoinSession* req)
+{
+    uint32_t session_id = req->session_id();
+    std::string player_nickname = req->player_nickname()->str();
+
+    // TODO: 서버는 session_id를 키로, 해당 세션에 속한 모든 Session* 객체 목록을 관리해야 합니다.
+    // map<uint32_t, vector<shared_ptr<Session>>> GameSessions; 와 같은 자료구조가 필요합니다.
+
+    try
+    {
+        sql::Connection& con = DatabaseManager::GetInstance().GetConnection();
+        // 1. SessionPlayers 테이블에 새로운 플레이어 삽입
+        std::unique_ptr<sql::PreparedStatement> pstmt(con.prepareStatement(
+            "INSERT INTO SessionPlayers (SessionID, PlayerNickname) VALUES (?, ?)"));
+        pstmt->setUInt(1, session_id);
+        pstmt->setString(2, player_nickname);
+        pstmt->executeUpdate();
+
+        // 2. DB에서 최신 세션 정보를 다시 읽어와 S2C_UpdateSessionBroadcast 패킷을 만듭니다.
+        //    (이 로직은 길기 때문에 별도 함수로 만드는 것이 좋습니다)
+        flatbuffers::FlatBufferBuilder builder;
+        BuildAndUpdateSession(session_id, builder); // 아래에 정의될 헬퍼 함수
+
+        // 3. TODO: 해당 세션의 모든 클라이언트에게 이 패킷을 브로드캐스팅합니다.
+        // for (auto& client_session : GameSessions[session_id])
+        // {
+        //     client_session->Send(builder.GetBufferPointer(), builder.GetSize());
+        // }
+    }
+    catch (const sql::SQLException& e)
+    {
+        std::cerr << "C2S_JoinSession DB Error: " << e.what() << std::endl;
+    }
+}
+
+// DB에서 세션 정보를 읽어 패킷을 만드는 헬퍼 함수
+void Session::BuildAndUpdateSession(uint32_t session_id, flatbuffers::FlatBufferBuilder& builder)
+{
+    // ... DB에서 SessionInfo, 모든 PlayerInfo 등을 읽어오는 로직 ...
+    // 최종적으로 아래와 같이 패킷을 만듭니다.
+    // auto session_info_obj = PacketData::CreateSessionInfo(builder, ...);
+    // auto payload = PacketData::CreateS2C_UpdateSessionBroadcast(builder, session_info_obj);
+    // auto packet = PacketData::CreatePacket(builder, 0, PacketData::PacketPayload_S2C_UpdateSessionBroadcast, payload.Union());
+    // builder.Finish(packet);
 }

@@ -15,35 +15,84 @@ static_assert(FLATBUFFERS_VERSION_MAJOR == 25 &&
 
 namespace PacketData {
 
-struct PlayerStat;
+struct MonsterInfo;
+struct MonsterInfoBuilder;
 
-struct MonsterStat;
+struct MapLevel;
 
-struct Level;
+struct Color;
 
-struct C2S_LevelData;
-struct C2S_LevelDataBuilder;
+struct PlayerInfo;
+struct PlayerInfoBuilder;
 
-struct S2C_LevelData;
-struct S2C_LevelDataBuilder;
+struct SessionInfo;
+struct SessionInfoBuilder;
 
-struct C2S_MonsterData;
-struct C2S_MonsterDataBuilder;
+struct C2S_GetMonsterData;
+struct C2S_GetMonsterDataBuilder;
 
-struct S2C_MonsterData;
-struct S2C_MonsterDataBuilder;
+struct S2C_GetMonsterDataResponse;
+struct S2C_GetMonsterDataResponseBuilder;
 
-struct C2S_SessionData;
-struct C2S_SessionDataBuilder;
+struct C2S_GetMonsterInstanceData;
+struct C2S_GetMonsterInstanceDataBuilder;
 
-struct S2C_SessionData;
-struct S2C_SessionDataBuilder;
+struct S2C_GetMonsterInstanceDataResponse;
+struct S2C_GetMonsterInstanceDataResponseBuilder;
 
-struct C2S_PlayerData;
-struct C2S_PlayerDataBuilder;
+struct C2S_DamageToMonster;
+struct C2S_DamageToMonsterBuilder;
 
-struct S2C_PlayerData;
-struct S2C_PlayerDataBuilder;
+struct S2C_DamageToMonsterBroadcast;
+struct S2C_DamageToMonsterBroadcastBuilder;
+
+struct C2S_DamageByMonster;
+struct C2S_DamageByMonsterBuilder;
+
+struct S2C_DamageByMonsterBroadcast;
+struct S2C_DamageByMonsterBroadcastBuilder;
+
+struct C2S_UpdatePlayerState;
+struct C2S_UpdatePlayerStateBuilder;
+
+struct S2C_UpdatePlayerStateBroadcast;
+struct S2C_UpdatePlayerStateBroadcastBuilder;
+
+struct C2S_UpdateCurPlayerState;
+struct C2S_UpdateCurPlayerStateBuilder;
+
+struct S2C_UpdateCurPlayerStateBroadcast;
+struct S2C_UpdateCurPlayerStateBroadcastBuilder;
+
+struct C2S_GetPlayerData;
+struct C2S_GetPlayerDataBuilder;
+
+struct S2C_GetPlayerDataResponse;
+struct S2C_GetPlayerDataResponseBuilder;
+
+struct C2S_GetLevelData;
+struct C2S_GetLevelDataBuilder;
+
+struct S2C_GetLevelDataResponse;
+struct S2C_GetLevelDataResponseBuilder;
+
+struct C2S_CreateSession;
+struct C2S_CreateSessionBuilder;
+
+struct S2C_CreateSessionResponse;
+struct S2C_CreateSessionResponseBuilder;
+
+struct S2C_UpdateSessionBroadcast;
+struct S2C_UpdateSessionBroadcastBuilder;
+
+struct C2S_JoinSession;
+struct C2S_JoinSessionBuilder;
+
+struct S2C_JoinSessionResponse;
+struct S2C_JoinSessionResponseBuilder;
+
+struct C2S_LeaveSession;
+struct C2S_LeaveSessionBuilder;
 
 struct Packet;
 struct PacketBuilder;
@@ -75,179 +124,195 @@ inline const char *EnumNameMonsterType(MonsterType e) {
   return EnumNamesMonsterType()[index];
 }
 
-enum PacketType : uint8_t {
-  PacketType_NONE = 0,
-  PacketType_C2S_LevelData = 1,
-  PacketType_S2C_LevelData = 2,
-  PacketType_C2S_MonsterData = 3,
-  PacketType_S2C_MonsterData = 4,
-  PacketType_C2S_SessionData = 5,
-  PacketType_S2C_SessionData = 6,
-  PacketType_C2S_PlayerData = 7,
-  PacketType_S2C_PlayerData = 8,
-  PacketType_MIN = PacketType_NONE,
-  PacketType_MAX = PacketType_S2C_PlayerData
+enum PacketPayload : uint8_t {
+  PacketPayload_NONE = 0,
+  PacketPayload_C2S_GetLevelData = 1,
+  PacketPayload_S2C_GetLevelDataResponse = 2,
+  PacketPayload_C2S_GetMonsterData = 3,
+  PacketPayload_S2C_GetMonsterDataResponse = 4,
+  PacketPayload_C2S_GetMonsterInstanceData = 5,
+  PacketPayload_S2C_GetMonsterInstanceDataResponse = 6,
+  PacketPayload_C2S_CreateSession = 7,
+  PacketPayload_S2C_CreateSessionResponse = 8,
+  PacketPayload_C2S_JoinSession = 9,
+  PacketPayload_S2C_JoinSessionResponse = 10,
+  PacketPayload_C2S_LeaveSession = 11,
+  PacketPayload_S2C_UpdateSessionBroadcast = 12,
+  PacketPayload_C2S_GetPlayerData = 13,
+  PacketPayload_S2C_GetPlayerDataResponse = 14,
+  PacketPayload_C2S_UpdatePlayerState = 15,
+  PacketPayload_S2C_UpdatePlayerStateBroadcast = 16,
+  PacketPayload_C2S_UpdateCurPlayerState = 17,
+  PacketPayload_S2C_UpdateCurPlayerStateBroadcast = 18,
+  PacketPayload_C2S_DamageToMonster = 19,
+  PacketPayload_S2C_DamageToMonsterBroadcast = 20,
+  PacketPayload_C2S_DamageByMonster = 21,
+  PacketPayload_S2C_DamageByMonsterBroadcast = 22,
+  PacketPayload_MIN = PacketPayload_NONE,
+  PacketPayload_MAX = PacketPayload_S2C_DamageByMonsterBroadcast
 };
 
-inline const PacketType (&EnumValuesPacketType())[9] {
-  static const PacketType values[] = {
-    PacketType_NONE,
-    PacketType_C2S_LevelData,
-    PacketType_S2C_LevelData,
-    PacketType_C2S_MonsterData,
-    PacketType_S2C_MonsterData,
-    PacketType_C2S_SessionData,
-    PacketType_S2C_SessionData,
-    PacketType_C2S_PlayerData,
-    PacketType_S2C_PlayerData
+inline const PacketPayload (&EnumValuesPacketPayload())[23] {
+  static const PacketPayload values[] = {
+    PacketPayload_NONE,
+    PacketPayload_C2S_GetLevelData,
+    PacketPayload_S2C_GetLevelDataResponse,
+    PacketPayload_C2S_GetMonsterData,
+    PacketPayload_S2C_GetMonsterDataResponse,
+    PacketPayload_C2S_GetMonsterInstanceData,
+    PacketPayload_S2C_GetMonsterInstanceDataResponse,
+    PacketPayload_C2S_CreateSession,
+    PacketPayload_S2C_CreateSessionResponse,
+    PacketPayload_C2S_JoinSession,
+    PacketPayload_S2C_JoinSessionResponse,
+    PacketPayload_C2S_LeaveSession,
+    PacketPayload_S2C_UpdateSessionBroadcast,
+    PacketPayload_C2S_GetPlayerData,
+    PacketPayload_S2C_GetPlayerDataResponse,
+    PacketPayload_C2S_UpdatePlayerState,
+    PacketPayload_S2C_UpdatePlayerStateBroadcast,
+    PacketPayload_C2S_UpdateCurPlayerState,
+    PacketPayload_S2C_UpdateCurPlayerStateBroadcast,
+    PacketPayload_C2S_DamageToMonster,
+    PacketPayload_S2C_DamageToMonsterBroadcast,
+    PacketPayload_C2S_DamageByMonster,
+    PacketPayload_S2C_DamageByMonsterBroadcast
   };
   return values;
 }
 
-inline const char * const *EnumNamesPacketType() {
-  static const char * const names[10] = {
+inline const char * const *EnumNamesPacketPayload() {
+  static const char * const names[24] = {
     "NONE",
-    "C2S_LevelData",
-    "S2C_LevelData",
-    "C2S_MonsterData",
-    "S2C_MonsterData",
-    "C2S_SessionData",
-    "S2C_SessionData",
-    "C2S_PlayerData",
-    "S2C_PlayerData",
+    "C2S_GetLevelData",
+    "S2C_GetLevelDataResponse",
+    "C2S_GetMonsterData",
+    "S2C_GetMonsterDataResponse",
+    "C2S_GetMonsterInstanceData",
+    "S2C_GetMonsterInstanceDataResponse",
+    "C2S_CreateSession",
+    "S2C_CreateSessionResponse",
+    "C2S_JoinSession",
+    "S2C_JoinSessionResponse",
+    "C2S_LeaveSession",
+    "S2C_UpdateSessionBroadcast",
+    "C2S_GetPlayerData",
+    "S2C_GetPlayerDataResponse",
+    "C2S_UpdatePlayerState",
+    "S2C_UpdatePlayerStateBroadcast",
+    "C2S_UpdateCurPlayerState",
+    "S2C_UpdateCurPlayerStateBroadcast",
+    "C2S_DamageToMonster",
+    "S2C_DamageToMonsterBroadcast",
+    "C2S_DamageByMonster",
+    "S2C_DamageByMonsterBroadcast",
     nullptr
   };
   return names;
 }
 
-inline const char *EnumNamePacketType(PacketType e) {
-  if (::flatbuffers::IsOutRange(e, PacketType_NONE, PacketType_S2C_PlayerData)) return "";
+inline const char *EnumNamePacketPayload(PacketPayload e) {
+  if (::flatbuffers::IsOutRange(e, PacketPayload_NONE, PacketPayload_S2C_DamageByMonsterBroadcast)) return "";
   const size_t index = static_cast<size_t>(e);
-  return EnumNamesPacketType()[index];
+  return EnumNamesPacketPayload()[index];
 }
 
-template<typename T> struct PacketTypeTraits {
-  static const PacketType enum_value = PacketType_NONE;
+template<typename T> struct PacketPayloadTraits {
+  static const PacketPayload enum_value = PacketPayload_NONE;
 };
 
-template<> struct PacketTypeTraits<PacketData::C2S_LevelData> {
-  static const PacketType enum_value = PacketType_C2S_LevelData;
+template<> struct PacketPayloadTraits<PacketData::C2S_GetLevelData> {
+  static const PacketPayload enum_value = PacketPayload_C2S_GetLevelData;
 };
 
-template<> struct PacketTypeTraits<PacketData::S2C_LevelData> {
-  static const PacketType enum_value = PacketType_S2C_LevelData;
+template<> struct PacketPayloadTraits<PacketData::S2C_GetLevelDataResponse> {
+  static const PacketPayload enum_value = PacketPayload_S2C_GetLevelDataResponse;
 };
 
-template<> struct PacketTypeTraits<PacketData::C2S_MonsterData> {
-  static const PacketType enum_value = PacketType_C2S_MonsterData;
+template<> struct PacketPayloadTraits<PacketData::C2S_GetMonsterData> {
+  static const PacketPayload enum_value = PacketPayload_C2S_GetMonsterData;
 };
 
-template<> struct PacketTypeTraits<PacketData::S2C_MonsterData> {
-  static const PacketType enum_value = PacketType_S2C_MonsterData;
+template<> struct PacketPayloadTraits<PacketData::S2C_GetMonsterDataResponse> {
+  static const PacketPayload enum_value = PacketPayload_S2C_GetMonsterDataResponse;
 };
 
-template<> struct PacketTypeTraits<PacketData::C2S_SessionData> {
-  static const PacketType enum_value = PacketType_C2S_SessionData;
+template<> struct PacketPayloadTraits<PacketData::C2S_GetMonsterInstanceData> {
+  static const PacketPayload enum_value = PacketPayload_C2S_GetMonsterInstanceData;
 };
 
-template<> struct PacketTypeTraits<PacketData::S2C_SessionData> {
-  static const PacketType enum_value = PacketType_S2C_SessionData;
+template<> struct PacketPayloadTraits<PacketData::S2C_GetMonsterInstanceDataResponse> {
+  static const PacketPayload enum_value = PacketPayload_S2C_GetMonsterInstanceDataResponse;
 };
 
-template<> struct PacketTypeTraits<PacketData::C2S_PlayerData> {
-  static const PacketType enum_value = PacketType_C2S_PlayerData;
+template<> struct PacketPayloadTraits<PacketData::C2S_CreateSession> {
+  static const PacketPayload enum_value = PacketPayload_C2S_CreateSession;
 };
 
-template<> struct PacketTypeTraits<PacketData::S2C_PlayerData> {
-  static const PacketType enum_value = PacketType_S2C_PlayerData;
+template<> struct PacketPayloadTraits<PacketData::S2C_CreateSessionResponse> {
+  static const PacketPayload enum_value = PacketPayload_S2C_CreateSessionResponse;
 };
 
-bool VerifyPacketType(::flatbuffers::Verifier &verifier, const void *obj, PacketType type);
-bool VerifyPacketTypeVector(::flatbuffers::Verifier &verifier, const ::flatbuffers::Vector<::flatbuffers::Offset<void>> *values, const ::flatbuffers::Vector<uint8_t> *types);
-
-FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(1) PlayerStat FLATBUFFERS_FINAL_CLASS {
- private:
-  uint8_t max_hp_;
-  uint8_t cur_hp_;
-  uint8_t range_;
-  uint8_t max_stamina_;
-  uint8_t cur_stamina_;
-  uint8_t move_speed_;
-
- public:
-  PlayerStat()
-      : max_hp_(0),
-        cur_hp_(0),
-        range_(0),
-        max_stamina_(0),
-        cur_stamina_(0),
-        move_speed_(0) {
-  }
-  PlayerStat(uint8_t _max_hp, uint8_t _cur_hp, uint8_t _range, uint8_t _max_stamina, uint8_t _cur_stamina, uint8_t _move_speed)
-      : max_hp_(::flatbuffers::EndianScalar(_max_hp)),
-        cur_hp_(::flatbuffers::EndianScalar(_cur_hp)),
-        range_(::flatbuffers::EndianScalar(_range)),
-        max_stamina_(::flatbuffers::EndianScalar(_max_stamina)),
-        cur_stamina_(::flatbuffers::EndianScalar(_cur_stamina)),
-        move_speed_(::flatbuffers::EndianScalar(_move_speed)) {
-  }
-  uint8_t max_hp() const {
-    return ::flatbuffers::EndianScalar(max_hp_);
-  }
-  uint8_t cur_hp() const {
-    return ::flatbuffers::EndianScalar(cur_hp_);
-  }
-  uint8_t range() const {
-    return ::flatbuffers::EndianScalar(range_);
-  }
-  uint8_t max_stamina() const {
-    return ::flatbuffers::EndianScalar(max_stamina_);
-  }
-  uint8_t cur_stamina() const {
-    return ::flatbuffers::EndianScalar(cur_stamina_);
-  }
-  uint8_t move_speed() const {
-    return ::flatbuffers::EndianScalar(move_speed_);
-  }
+template<> struct PacketPayloadTraits<PacketData::C2S_JoinSession> {
+  static const PacketPayload enum_value = PacketPayload_C2S_JoinSession;
 };
-FLATBUFFERS_STRUCT_END(PlayerStat, 6);
 
-FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(1) MonsterStat FLATBUFFERS_FINAL_CLASS {
- private:
-  int8_t monster_type_;
-  uint8_t max_hp_;
-  uint8_t damage_;
-  uint8_t move_speed_;
-
- public:
-  MonsterStat()
-      : monster_type_(0),
-        max_hp_(0),
-        damage_(0),
-        move_speed_(0) {
-  }
-  MonsterStat(PacketData::MonsterType _monster_type, uint8_t _max_hp, uint8_t _damage, uint8_t _move_speed)
-      : monster_type_(::flatbuffers::EndianScalar(static_cast<int8_t>(_monster_type))),
-        max_hp_(::flatbuffers::EndianScalar(_max_hp)),
-        damage_(::flatbuffers::EndianScalar(_damage)),
-        move_speed_(::flatbuffers::EndianScalar(_move_speed)) {
-  }
-  PacketData::MonsterType monster_type() const {
-    return static_cast<PacketData::MonsterType>(::flatbuffers::EndianScalar(monster_type_));
-  }
-  uint8_t max_hp() const {
-    return ::flatbuffers::EndianScalar(max_hp_);
-  }
-  uint8_t damage() const {
-    return ::flatbuffers::EndianScalar(damage_);
-  }
-  uint8_t move_speed() const {
-    return ::flatbuffers::EndianScalar(move_speed_);
-  }
+template<> struct PacketPayloadTraits<PacketData::S2C_JoinSessionResponse> {
+  static const PacketPayload enum_value = PacketPayload_S2C_JoinSessionResponse;
 };
-FLATBUFFERS_STRUCT_END(MonsterStat, 4);
 
-FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Level FLATBUFFERS_FINAL_CLASS {
+template<> struct PacketPayloadTraits<PacketData::C2S_LeaveSession> {
+  static const PacketPayload enum_value = PacketPayload_C2S_LeaveSession;
+};
+
+template<> struct PacketPayloadTraits<PacketData::S2C_UpdateSessionBroadcast> {
+  static const PacketPayload enum_value = PacketPayload_S2C_UpdateSessionBroadcast;
+};
+
+template<> struct PacketPayloadTraits<PacketData::C2S_GetPlayerData> {
+  static const PacketPayload enum_value = PacketPayload_C2S_GetPlayerData;
+};
+
+template<> struct PacketPayloadTraits<PacketData::S2C_GetPlayerDataResponse> {
+  static const PacketPayload enum_value = PacketPayload_S2C_GetPlayerDataResponse;
+};
+
+template<> struct PacketPayloadTraits<PacketData::C2S_UpdatePlayerState> {
+  static const PacketPayload enum_value = PacketPayload_C2S_UpdatePlayerState;
+};
+
+template<> struct PacketPayloadTraits<PacketData::S2C_UpdatePlayerStateBroadcast> {
+  static const PacketPayload enum_value = PacketPayload_S2C_UpdatePlayerStateBroadcast;
+};
+
+template<> struct PacketPayloadTraits<PacketData::C2S_UpdateCurPlayerState> {
+  static const PacketPayload enum_value = PacketPayload_C2S_UpdateCurPlayerState;
+};
+
+template<> struct PacketPayloadTraits<PacketData::S2C_UpdateCurPlayerStateBroadcast> {
+  static const PacketPayload enum_value = PacketPayload_S2C_UpdateCurPlayerStateBroadcast;
+};
+
+template<> struct PacketPayloadTraits<PacketData::C2S_DamageToMonster> {
+  static const PacketPayload enum_value = PacketPayload_C2S_DamageToMonster;
+};
+
+template<> struct PacketPayloadTraits<PacketData::S2C_DamageToMonsterBroadcast> {
+  static const PacketPayload enum_value = PacketPayload_S2C_DamageToMonsterBroadcast;
+};
+
+template<> struct PacketPayloadTraits<PacketData::C2S_DamageByMonster> {
+  static const PacketPayload enum_value = PacketPayload_C2S_DamageByMonster;
+};
+
+template<> struct PacketPayloadTraits<PacketData::S2C_DamageByMonsterBroadcast> {
+  static const PacketPayload enum_value = PacketPayload_S2C_DamageByMonsterBroadcast;
+};
+
+bool VerifyPacketPayload(::flatbuffers::Verifier &verifier, const void *obj, PacketPayload type);
+bool VerifyPacketPayloadVector(::flatbuffers::Verifier &verifier, const ::flatbuffers::Vector<::flatbuffers::Offset<void>> *values, const ::flatbuffers::Vector<uint8_t> *types);
+
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) MapLevel FLATBUFFERS_FINAL_CLASS {
  private:
   uint8_t step_;
   int8_t padding0__;  int16_t padding1__;
@@ -256,7 +321,7 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Level FLATBUFFERS_FINAL_CLASS {
   int8_t padding2__;  int16_t padding3__;
 
  public:
-  Level()
+  MapLevel()
       : step_(0),
         padding0__(0),
         padding1__(0),
@@ -269,7 +334,7 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Level FLATBUFFERS_FINAL_CLASS {
     (void)padding2__;
     (void)padding3__;
   }
-  Level(uint8_t _step, uint32_t _goal_money, uint8_t _goal_round)
+  MapLevel(uint8_t _step, uint32_t _goal_money, uint8_t _goal_round)
       : step_(::flatbuffers::EndianScalar(_step)),
         padding0__(0),
         padding1__(0),
@@ -292,10 +357,1217 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Level FLATBUFFERS_FINAL_CLASS {
     return ::flatbuffers::EndianScalar(goal_round_);
   }
 };
-FLATBUFFERS_STRUCT_END(Level, 12);
+FLATBUFFERS_STRUCT_END(MapLevel, 12);
 
-struct C2S_LevelData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef C2S_LevelDataBuilder Builder;
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(1) Color FLATBUFFERS_FINAL_CLASS {
+ private:
+  int8_t r_;
+  int8_t g_;
+  int8_t b_;
+
+ public:
+  Color()
+      : r_(0),
+        g_(0),
+        b_(0) {
+  }
+  Color(int8_t _r, int8_t _g, int8_t _b)
+      : r_(::flatbuffers::EndianScalar(_r)),
+        g_(::flatbuffers::EndianScalar(_g)),
+        b_(::flatbuffers::EndianScalar(_b)) {
+  }
+  int8_t r() const {
+    return ::flatbuffers::EndianScalar(r_);
+  }
+  int8_t g() const {
+    return ::flatbuffers::EndianScalar(g_);
+  }
+  int8_t b() const {
+    return ::flatbuffers::EndianScalar(b_);
+  }
+};
+FLATBUFFERS_STRUCT_END(Color, 3);
+
+struct MonsterInfo FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef MonsterInfoBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MONSTER_INDEX = 4,
+    VT_MONSTER_TYPE = 6,
+    VT_MONSTER_NAME = 8,
+    VT_MAX_HEALTH = 10,
+    VT_CUR_HEALTH = 12,
+    VT_DAMAGE = 14,
+    VT_MOVE_SPEED = 16
+  };
+  uint8_t monster_index() const {
+    return GetField<uint8_t>(VT_MONSTER_INDEX, 0);
+  }
+  PacketData::MonsterType monster_type() const {
+    return static_cast<PacketData::MonsterType>(GetField<int8_t>(VT_MONSTER_TYPE, 0));
+  }
+  const ::flatbuffers::String *monster_name() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_MONSTER_NAME);
+  }
+  uint8_t max_health() const {
+    return GetField<uint8_t>(VT_MAX_HEALTH, 0);
+  }
+  uint8_t cur_health() const {
+    return GetField<uint8_t>(VT_CUR_HEALTH, 0);
+  }
+  uint8_t damage() const {
+    return GetField<uint8_t>(VT_DAMAGE, 0);
+  }
+  uint8_t move_speed() const {
+    return GetField<uint8_t>(VT_MOVE_SPEED, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_MONSTER_INDEX, 1) &&
+           VerifyField<int8_t>(verifier, VT_MONSTER_TYPE, 1) &&
+           VerifyOffset(verifier, VT_MONSTER_NAME) &&
+           verifier.VerifyString(monster_name()) &&
+           VerifyField<uint8_t>(verifier, VT_MAX_HEALTH, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CUR_HEALTH, 1) &&
+           VerifyField<uint8_t>(verifier, VT_DAMAGE, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MOVE_SPEED, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct MonsterInfoBuilder {
+  typedef MonsterInfo Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_monster_index(uint8_t monster_index) {
+    fbb_.AddElement<uint8_t>(MonsterInfo::VT_MONSTER_INDEX, monster_index, 0);
+  }
+  void add_monster_type(PacketData::MonsterType monster_type) {
+    fbb_.AddElement<int8_t>(MonsterInfo::VT_MONSTER_TYPE, static_cast<int8_t>(monster_type), 0);
+  }
+  void add_monster_name(::flatbuffers::Offset<::flatbuffers::String> monster_name) {
+    fbb_.AddOffset(MonsterInfo::VT_MONSTER_NAME, monster_name);
+  }
+  void add_max_health(uint8_t max_health) {
+    fbb_.AddElement<uint8_t>(MonsterInfo::VT_MAX_HEALTH, max_health, 0);
+  }
+  void add_cur_health(uint8_t cur_health) {
+    fbb_.AddElement<uint8_t>(MonsterInfo::VT_CUR_HEALTH, cur_health, 0);
+  }
+  void add_damage(uint8_t damage) {
+    fbb_.AddElement<uint8_t>(MonsterInfo::VT_DAMAGE, damage, 0);
+  }
+  void add_move_speed(uint8_t move_speed) {
+    fbb_.AddElement<uint8_t>(MonsterInfo::VT_MOVE_SPEED, move_speed, 0);
+  }
+  explicit MonsterInfoBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<MonsterInfo> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<MonsterInfo>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<MonsterInfo> CreateMonsterInfo(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t monster_index = 0,
+    PacketData::MonsterType monster_type = PacketData::MonsterType_Test,
+    ::flatbuffers::Offset<::flatbuffers::String> monster_name = 0,
+    uint8_t max_health = 0,
+    uint8_t cur_health = 0,
+    uint8_t damage = 0,
+    uint8_t move_speed = 0) {
+  MonsterInfoBuilder builder_(_fbb);
+  builder_.add_monster_name(monster_name);
+  builder_.add_move_speed(move_speed);
+  builder_.add_damage(damage);
+  builder_.add_cur_health(cur_health);
+  builder_.add_max_health(max_health);
+  builder_.add_monster_type(monster_type);
+  builder_.add_monster_index(monster_index);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<MonsterInfo> CreateMonsterInfoDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t monster_index = 0,
+    PacketData::MonsterType monster_type = PacketData::MonsterType_Test,
+    const char *monster_name = nullptr,
+    uint8_t max_health = 0,
+    uint8_t cur_health = 0,
+    uint8_t damage = 0,
+    uint8_t move_speed = 0) {
+  auto monster_name__ = monster_name ? _fbb.CreateString(monster_name) : 0;
+  return PacketData::CreateMonsterInfo(
+      _fbb,
+      monster_index,
+      monster_type,
+      monster_name__,
+      max_health,
+      cur_health,
+      damage,
+      move_speed);
+}
+
+struct PlayerInfo FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef PlayerInfoBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_PLAYER_INDEX = 4,
+    VT_NICKNAME = 6,
+    VT_COLOR = 8,
+    VT_MAX_HEALTH = 10,
+    VT_CURRENT_HEALTH = 12,
+    VT_GRAB_RANGE = 14,
+    VT_MAX_STAMINA = 16,
+    VT_CURRENT_STAMINA = 18,
+    VT_MOVE_SPEED = 20
+  };
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  const ::flatbuffers::String *nickname() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_NICKNAME);
+  }
+  const PacketData::Color *color() const {
+    return GetStruct<const PacketData::Color *>(VT_COLOR);
+  }
+  uint8_t max_health() const {
+    return GetField<uint8_t>(VT_MAX_HEALTH, 0);
+  }
+  uint8_t current_health() const {
+    return GetField<uint8_t>(VT_CURRENT_HEALTH, 0);
+  }
+  uint8_t grab_range() const {
+    return GetField<uint8_t>(VT_GRAB_RANGE, 0);
+  }
+  uint8_t max_stamina() const {
+    return GetField<uint8_t>(VT_MAX_STAMINA, 0);
+  }
+  uint8_t current_stamina() const {
+    return GetField<uint8_t>(VT_CURRENT_STAMINA, 0);
+  }
+  uint8_t move_speed() const {
+    return GetField<uint8_t>(VT_MOVE_SPEED, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyOffset(verifier, VT_NICKNAME) &&
+           verifier.VerifyString(nickname()) &&
+           VerifyField<PacketData::Color>(verifier, VT_COLOR, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MAX_HEALTH, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CURRENT_HEALTH, 1) &&
+           VerifyField<uint8_t>(verifier, VT_GRAB_RANGE, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MAX_STAMINA, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CURRENT_STAMINA, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MOVE_SPEED, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct PlayerInfoBuilder {
+  typedef PlayerInfo Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(PlayerInfo::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_nickname(::flatbuffers::Offset<::flatbuffers::String> nickname) {
+    fbb_.AddOffset(PlayerInfo::VT_NICKNAME, nickname);
+  }
+  void add_color(const PacketData::Color *color) {
+    fbb_.AddStruct(PlayerInfo::VT_COLOR, color);
+  }
+  void add_max_health(uint8_t max_health) {
+    fbb_.AddElement<uint8_t>(PlayerInfo::VT_MAX_HEALTH, max_health, 0);
+  }
+  void add_current_health(uint8_t current_health) {
+    fbb_.AddElement<uint8_t>(PlayerInfo::VT_CURRENT_HEALTH, current_health, 0);
+  }
+  void add_grab_range(uint8_t grab_range) {
+    fbb_.AddElement<uint8_t>(PlayerInfo::VT_GRAB_RANGE, grab_range, 0);
+  }
+  void add_max_stamina(uint8_t max_stamina) {
+    fbb_.AddElement<uint8_t>(PlayerInfo::VT_MAX_STAMINA, max_stamina, 0);
+  }
+  void add_current_stamina(uint8_t current_stamina) {
+    fbb_.AddElement<uint8_t>(PlayerInfo::VT_CURRENT_STAMINA, current_stamina, 0);
+  }
+  void add_move_speed(uint8_t move_speed) {
+    fbb_.AddElement<uint8_t>(PlayerInfo::VT_MOVE_SPEED, move_speed, 0);
+  }
+  explicit PlayerInfoBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<PlayerInfo> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<PlayerInfo>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<PlayerInfo> CreatePlayerInfo(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    int8_t player_index = 0,
+    ::flatbuffers::Offset<::flatbuffers::String> nickname = 0,
+    const PacketData::Color *color = nullptr,
+    uint8_t max_health = 0,
+    uint8_t current_health = 0,
+    uint8_t grab_range = 0,
+    uint8_t max_stamina = 0,
+    uint8_t current_stamina = 0,
+    uint8_t move_speed = 0) {
+  PlayerInfoBuilder builder_(_fbb);
+  builder_.add_color(color);
+  builder_.add_nickname(nickname);
+  builder_.add_move_speed(move_speed);
+  builder_.add_current_stamina(current_stamina);
+  builder_.add_max_stamina(max_stamina);
+  builder_.add_grab_range(grab_range);
+  builder_.add_current_health(current_health);
+  builder_.add_max_health(max_health);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<PlayerInfo> CreatePlayerInfoDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    int8_t player_index = 0,
+    const char *nickname = nullptr,
+    const PacketData::Color *color = nullptr,
+    uint8_t max_health = 0,
+    uint8_t current_health = 0,
+    uint8_t grab_range = 0,
+    uint8_t max_stamina = 0,
+    uint8_t current_stamina = 0,
+    uint8_t move_speed = 0) {
+  auto nickname__ = nickname ? _fbb.CreateString(nickname) : 0;
+  return PacketData::CreatePlayerInfo(
+      _fbb,
+      player_index,
+      nickname__,
+      color,
+      max_health,
+      current_health,
+      grab_range,
+      max_stamina,
+      current_stamina,
+      move_speed);
+}
+
+struct SessionInfo FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef SessionInfoBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_SESSION_ID = 4,
+    VT_IP_ADDRESS = 6,
+    VT_STEP = 8,
+    VT_PLAYER_INFO = 10,
+    VT_MONSTER_INFO = 12,
+    VT_USABLE_MONEY = 14,
+    VT_NOW_ROUND = 16
+  };
+  uint32_t session_id() const {
+    return GetField<uint32_t>(VT_SESSION_ID, 0);
+  }
+  const ::flatbuffers::String *ip_address() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_IP_ADDRESS);
+  }
+  uint8_t step() const {
+    return GetField<uint8_t>(VT_STEP, 0);
+  }
+  const ::flatbuffers::Vector<::flatbuffers::Offset<PacketData::PlayerInfo>> *player_info() const {
+    return GetPointer<const ::flatbuffers::Vector<::flatbuffers::Offset<PacketData::PlayerInfo>> *>(VT_PLAYER_INFO);
+  }
+  const ::flatbuffers::Vector<::flatbuffers::Offset<PacketData::MonsterInfo>> *monster_info() const {
+    return GetPointer<const ::flatbuffers::Vector<::flatbuffers::Offset<PacketData::MonsterInfo>> *>(VT_MONSTER_INFO);
+  }
+  uint32_t usable_money() const {
+    return GetField<uint32_t>(VT_USABLE_MONEY, 0);
+  }
+  uint8_t now_round() const {
+    return GetField<uint8_t>(VT_NOW_ROUND, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
+           VerifyOffset(verifier, VT_IP_ADDRESS) &&
+           verifier.VerifyString(ip_address()) &&
+           VerifyField<uint8_t>(verifier, VT_STEP, 1) &&
+           VerifyOffset(verifier, VT_PLAYER_INFO) &&
+           verifier.VerifyVector(player_info()) &&
+           verifier.VerifyVectorOfTables(player_info()) &&
+           VerifyOffset(verifier, VT_MONSTER_INFO) &&
+           verifier.VerifyVector(monster_info()) &&
+           verifier.VerifyVectorOfTables(monster_info()) &&
+           VerifyField<uint32_t>(verifier, VT_USABLE_MONEY, 4) &&
+           VerifyField<uint8_t>(verifier, VT_NOW_ROUND, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct SessionInfoBuilder {
+  typedef SessionInfo Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_session_id(uint32_t session_id) {
+    fbb_.AddElement<uint32_t>(SessionInfo::VT_SESSION_ID, session_id, 0);
+  }
+  void add_ip_address(::flatbuffers::Offset<::flatbuffers::String> ip_address) {
+    fbb_.AddOffset(SessionInfo::VT_IP_ADDRESS, ip_address);
+  }
+  void add_step(uint8_t step) {
+    fbb_.AddElement<uint8_t>(SessionInfo::VT_STEP, step, 0);
+  }
+  void add_player_info(::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<PacketData::PlayerInfo>>> player_info) {
+    fbb_.AddOffset(SessionInfo::VT_PLAYER_INFO, player_info);
+  }
+  void add_monster_info(::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<PacketData::MonsterInfo>>> monster_info) {
+    fbb_.AddOffset(SessionInfo::VT_MONSTER_INFO, monster_info);
+  }
+  void add_usable_money(uint32_t usable_money) {
+    fbb_.AddElement<uint32_t>(SessionInfo::VT_USABLE_MONEY, usable_money, 0);
+  }
+  void add_now_round(uint8_t now_round) {
+    fbb_.AddElement<uint8_t>(SessionInfo::VT_NOW_ROUND, now_round, 0);
+  }
+  explicit SessionInfoBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<SessionInfo> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<SessionInfo>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<SessionInfo> CreateSessionInfo(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t session_id = 0,
+    ::flatbuffers::Offset<::flatbuffers::String> ip_address = 0,
+    uint8_t step = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<PacketData::PlayerInfo>>> player_info = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<PacketData::MonsterInfo>>> monster_info = 0,
+    uint32_t usable_money = 0,
+    uint8_t now_round = 0) {
+  SessionInfoBuilder builder_(_fbb);
+  builder_.add_usable_money(usable_money);
+  builder_.add_monster_info(monster_info);
+  builder_.add_player_info(player_info);
+  builder_.add_ip_address(ip_address);
+  builder_.add_session_id(session_id);
+  builder_.add_now_round(now_round);
+  builder_.add_step(step);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<SessionInfo> CreateSessionInfoDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t session_id = 0,
+    const char *ip_address = nullptr,
+    uint8_t step = 0,
+    const std::vector<::flatbuffers::Offset<PacketData::PlayerInfo>> *player_info = nullptr,
+    const std::vector<::flatbuffers::Offset<PacketData::MonsterInfo>> *monster_info = nullptr,
+    uint32_t usable_money = 0,
+    uint8_t now_round = 0) {
+  auto ip_address__ = ip_address ? _fbb.CreateString(ip_address) : 0;
+  auto player_info__ = player_info ? _fbb.CreateVector<::flatbuffers::Offset<PacketData::PlayerInfo>>(*player_info) : 0;
+  auto monster_info__ = monster_info ? _fbb.CreateVector<::flatbuffers::Offset<PacketData::MonsterInfo>>(*monster_info) : 0;
+  return PacketData::CreateSessionInfo(
+      _fbb,
+      session_id,
+      ip_address__,
+      step,
+      player_info__,
+      monster_info__,
+      usable_money,
+      now_round);
+}
+
+struct C2S_GetMonsterData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_GetMonsterDataBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MONSTER_TYPE = 4
+  };
+  PacketData::MonsterType monster_type() const {
+    return static_cast<PacketData::MonsterType>(GetField<int8_t>(VT_MONSTER_TYPE, 0));
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int8_t>(verifier, VT_MONSTER_TYPE, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct C2S_GetMonsterDataBuilder {
+  typedef C2S_GetMonsterData Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_monster_type(PacketData::MonsterType monster_type) {
+    fbb_.AddElement<int8_t>(C2S_GetMonsterData::VT_MONSTER_TYPE, static_cast<int8_t>(monster_type), 0);
+  }
+  explicit C2S_GetMonsterDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<C2S_GetMonsterData> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<C2S_GetMonsterData>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<C2S_GetMonsterData> CreateC2S_GetMonsterData(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    PacketData::MonsterType monster_type = PacketData::MonsterType_Test) {
+  C2S_GetMonsterDataBuilder builder_(_fbb);
+  builder_.add_monster_type(monster_type);
+  return builder_.Finish();
+}
+
+struct S2C_GetMonsterDataResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_GetMonsterDataResponseBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MONSTER_INFO = 4
+  };
+  const PacketData::MonsterInfo *monster_info() const {
+    return GetPointer<const PacketData::MonsterInfo *>(VT_MONSTER_INFO);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_MONSTER_INFO) &&
+           verifier.VerifyTable(monster_info()) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_GetMonsterDataResponseBuilder {
+  typedef S2C_GetMonsterDataResponse Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_monster_info(::flatbuffers::Offset<PacketData::MonsterInfo> monster_info) {
+    fbb_.AddOffset(S2C_GetMonsterDataResponse::VT_MONSTER_INFO, monster_info);
+  }
+  explicit S2C_GetMonsterDataResponseBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_GetMonsterDataResponse> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_GetMonsterDataResponse>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_GetMonsterDataResponse> CreateS2C_GetMonsterDataResponse(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    ::flatbuffers::Offset<PacketData::MonsterInfo> monster_info = 0) {
+  S2C_GetMonsterDataResponseBuilder builder_(_fbb);
+  builder_.add_monster_info(monster_info);
+  return builder_.Finish();
+}
+
+struct C2S_GetMonsterInstanceData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_GetMonsterInstanceDataBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MONSTER_INDEX = 4
+  };
+  uint8_t monster_index() const {
+    return GetField<uint8_t>(VT_MONSTER_INDEX, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_MONSTER_INDEX, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct C2S_GetMonsterInstanceDataBuilder {
+  typedef C2S_GetMonsterInstanceData Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_monster_index(uint8_t monster_index) {
+    fbb_.AddElement<uint8_t>(C2S_GetMonsterInstanceData::VT_MONSTER_INDEX, monster_index, 0);
+  }
+  explicit C2S_GetMonsterInstanceDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<C2S_GetMonsterInstanceData> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<C2S_GetMonsterInstanceData>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<C2S_GetMonsterInstanceData> CreateC2S_GetMonsterInstanceData(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t monster_index = 0) {
+  C2S_GetMonsterInstanceDataBuilder builder_(_fbb);
+  builder_.add_monster_index(monster_index);
+  return builder_.Finish();
+}
+
+struct S2C_GetMonsterInstanceDataResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_GetMonsterInstanceDataResponseBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MONSTER_INFO = 4
+  };
+  const PacketData::MonsterInfo *monster_info() const {
+    return GetPointer<const PacketData::MonsterInfo *>(VT_MONSTER_INFO);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_MONSTER_INFO) &&
+           verifier.VerifyTable(monster_info()) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_GetMonsterInstanceDataResponseBuilder {
+  typedef S2C_GetMonsterInstanceDataResponse Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_monster_info(::flatbuffers::Offset<PacketData::MonsterInfo> monster_info) {
+    fbb_.AddOffset(S2C_GetMonsterInstanceDataResponse::VT_MONSTER_INFO, monster_info);
+  }
+  explicit S2C_GetMonsterInstanceDataResponseBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_GetMonsterInstanceDataResponse> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_GetMonsterInstanceDataResponse>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_GetMonsterInstanceDataResponse> CreateS2C_GetMonsterInstanceDataResponse(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    ::flatbuffers::Offset<PacketData::MonsterInfo> monster_info = 0) {
+  S2C_GetMonsterInstanceDataResponseBuilder builder_(_fbb);
+  builder_.add_monster_info(monster_info);
+  return builder_.Finish();
+}
+
+struct C2S_DamageToMonster FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_DamageToMonsterBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_PLAYER_INDEX = 4,
+    VT_MONSTER_INDEX = 6,
+    VT_DAMAGE = 8
+  };
+  uint8_t player_index() const {
+    return GetField<uint8_t>(VT_PLAYER_INDEX, 0);
+  }
+  uint8_t monster_index() const {
+    return GetField<uint8_t>(VT_MONSTER_INDEX, 0);
+  }
+  uint8_t damage() const {
+    return GetField<uint8_t>(VT_DAMAGE, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MONSTER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_DAMAGE, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct C2S_DamageToMonsterBuilder {
+  typedef C2S_DamageToMonster Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_player_index(uint8_t player_index) {
+    fbb_.AddElement<uint8_t>(C2S_DamageToMonster::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_monster_index(uint8_t monster_index) {
+    fbb_.AddElement<uint8_t>(C2S_DamageToMonster::VT_MONSTER_INDEX, monster_index, 0);
+  }
+  void add_damage(uint8_t damage) {
+    fbb_.AddElement<uint8_t>(C2S_DamageToMonster::VT_DAMAGE, damage, 0);
+  }
+  explicit C2S_DamageToMonsterBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<C2S_DamageToMonster> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<C2S_DamageToMonster>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<C2S_DamageToMonster> CreateC2S_DamageToMonster(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t player_index = 0,
+    uint8_t monster_index = 0,
+    uint8_t damage = 0) {
+  C2S_DamageToMonsterBuilder builder_(_fbb);
+  builder_.add_damage(damage);
+  builder_.add_monster_index(monster_index);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct S2C_DamageToMonsterBroadcast FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_DamageToMonsterBroadcastBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_PLAYER_INDEX = 4,
+    VT_MONSTER_INDEX = 6,
+    VT_MONSTER_CUR_HP = 8
+  };
+  uint8_t player_index() const {
+    return GetField<uint8_t>(VT_PLAYER_INDEX, 0);
+  }
+  uint8_t monster_index() const {
+    return GetField<uint8_t>(VT_MONSTER_INDEX, 0);
+  }
+  uint8_t monster_cur_hp() const {
+    return GetField<uint8_t>(VT_MONSTER_CUR_HP, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MONSTER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MONSTER_CUR_HP, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_DamageToMonsterBroadcastBuilder {
+  typedef S2C_DamageToMonsterBroadcast Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_player_index(uint8_t player_index) {
+    fbb_.AddElement<uint8_t>(S2C_DamageToMonsterBroadcast::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_monster_index(uint8_t monster_index) {
+    fbb_.AddElement<uint8_t>(S2C_DamageToMonsterBroadcast::VT_MONSTER_INDEX, monster_index, 0);
+  }
+  void add_monster_cur_hp(uint8_t monster_cur_hp) {
+    fbb_.AddElement<uint8_t>(S2C_DamageToMonsterBroadcast::VT_MONSTER_CUR_HP, monster_cur_hp, 0);
+  }
+  explicit S2C_DamageToMonsterBroadcastBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_DamageToMonsterBroadcast> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_DamageToMonsterBroadcast>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_DamageToMonsterBroadcast> CreateS2C_DamageToMonsterBroadcast(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t player_index = 0,
+    uint8_t monster_index = 0,
+    uint8_t monster_cur_hp = 0) {
+  S2C_DamageToMonsterBroadcastBuilder builder_(_fbb);
+  builder_.add_monster_cur_hp(monster_cur_hp);
+  builder_.add_monster_index(monster_index);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct C2S_DamageByMonster FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_DamageByMonsterBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_PLAYER_INDEX = 4,
+    VT_MONSTER_INDEX = 6,
+    VT_DAMAGE = 8
+  };
+  uint8_t player_index() const {
+    return GetField<uint8_t>(VT_PLAYER_INDEX, 0);
+  }
+  uint8_t monster_index() const {
+    return GetField<uint8_t>(VT_MONSTER_INDEX, 0);
+  }
+  uint8_t damage() const {
+    return GetField<uint8_t>(VT_DAMAGE, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MONSTER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_DAMAGE, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct C2S_DamageByMonsterBuilder {
+  typedef C2S_DamageByMonster Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_player_index(uint8_t player_index) {
+    fbb_.AddElement<uint8_t>(C2S_DamageByMonster::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_monster_index(uint8_t monster_index) {
+    fbb_.AddElement<uint8_t>(C2S_DamageByMonster::VT_MONSTER_INDEX, monster_index, 0);
+  }
+  void add_damage(uint8_t damage) {
+    fbb_.AddElement<uint8_t>(C2S_DamageByMonster::VT_DAMAGE, damage, 0);
+  }
+  explicit C2S_DamageByMonsterBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<C2S_DamageByMonster> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<C2S_DamageByMonster>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<C2S_DamageByMonster> CreateC2S_DamageByMonster(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t player_index = 0,
+    uint8_t monster_index = 0,
+    uint8_t damage = 0) {
+  C2S_DamageByMonsterBuilder builder_(_fbb);
+  builder_.add_damage(damage);
+  builder_.add_monster_index(monster_index);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct S2C_DamageByMonsterBroadcast FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_DamageByMonsterBroadcastBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_PLAYER_INDEX = 4,
+    VT_MONSTER_INDEX = 6,
+    VT_PLAYER_CUR_HP = 8
+  };
+  uint8_t player_index() const {
+    return GetField<uint8_t>(VT_PLAYER_INDEX, 0);
+  }
+  uint8_t monster_index() const {
+    return GetField<uint8_t>(VT_MONSTER_INDEX, 0);
+  }
+  uint8_t player_cur_hp() const {
+    return GetField<uint8_t>(VT_PLAYER_CUR_HP, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_MONSTER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_PLAYER_CUR_HP, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_DamageByMonsterBroadcastBuilder {
+  typedef S2C_DamageByMonsterBroadcast Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_player_index(uint8_t player_index) {
+    fbb_.AddElement<uint8_t>(S2C_DamageByMonsterBroadcast::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_monster_index(uint8_t monster_index) {
+    fbb_.AddElement<uint8_t>(S2C_DamageByMonsterBroadcast::VT_MONSTER_INDEX, monster_index, 0);
+  }
+  void add_player_cur_hp(uint8_t player_cur_hp) {
+    fbb_.AddElement<uint8_t>(S2C_DamageByMonsterBroadcast::VT_PLAYER_CUR_HP, player_cur_hp, 0);
+  }
+  explicit S2C_DamageByMonsterBroadcastBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_DamageByMonsterBroadcast> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_DamageByMonsterBroadcast>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_DamageByMonsterBroadcast> CreateS2C_DamageByMonsterBroadcast(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t player_index = 0,
+    uint8_t monster_index = 0,
+    uint8_t player_cur_hp = 0) {
+  S2C_DamageByMonsterBroadcastBuilder builder_(_fbb);
+  builder_.add_player_cur_hp(player_cur_hp);
+  builder_.add_monster_index(monster_index);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct C2S_UpdatePlayerState FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_UpdatePlayerStateBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_SESSION_ID = 4,
+    VT_PLAYER_INDEX = 6,
+    VT_PLAYER_INFO = 8
+  };
+  uint32_t session_id() const {
+    return GetField<uint32_t>(VT_SESSION_ID, 0);
+  }
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  const PacketData::PlayerInfo *player_info() const {
+    return GetPointer<const PacketData::PlayerInfo *>(VT_PLAYER_INFO);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyOffset(verifier, VT_PLAYER_INFO) &&
+           verifier.VerifyTable(player_info()) &&
+           verifier.EndTable();
+  }
+};
+
+struct C2S_UpdatePlayerStateBuilder {
+  typedef C2S_UpdatePlayerState Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_session_id(uint32_t session_id) {
+    fbb_.AddElement<uint32_t>(C2S_UpdatePlayerState::VT_SESSION_ID, session_id, 0);
+  }
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(C2S_UpdatePlayerState::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_player_info(::flatbuffers::Offset<PacketData::PlayerInfo> player_info) {
+    fbb_.AddOffset(C2S_UpdatePlayerState::VT_PLAYER_INFO, player_info);
+  }
+  explicit C2S_UpdatePlayerStateBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<C2S_UpdatePlayerState> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<C2S_UpdatePlayerState>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<C2S_UpdatePlayerState> CreateC2S_UpdatePlayerState(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t session_id = 0,
+    int8_t player_index = 0,
+    ::flatbuffers::Offset<PacketData::PlayerInfo> player_info = 0) {
+  C2S_UpdatePlayerStateBuilder builder_(_fbb);
+  builder_.add_player_info(player_info);
+  builder_.add_session_id(session_id);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct S2C_UpdatePlayerStateBroadcast FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_UpdatePlayerStateBroadcastBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_SESSION_ID = 4,
+    VT_PLAYER_INDEX = 6,
+    VT_PLAYER_INFO = 8
+  };
+  uint32_t session_id() const {
+    return GetField<uint32_t>(VT_SESSION_ID, 0);
+  }
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  const PacketData::PlayerInfo *player_info() const {
+    return GetPointer<const PacketData::PlayerInfo *>(VT_PLAYER_INFO);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyOffset(verifier, VT_PLAYER_INFO) &&
+           verifier.VerifyTable(player_info()) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_UpdatePlayerStateBroadcastBuilder {
+  typedef S2C_UpdatePlayerStateBroadcast Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_session_id(uint32_t session_id) {
+    fbb_.AddElement<uint32_t>(S2C_UpdatePlayerStateBroadcast::VT_SESSION_ID, session_id, 0);
+  }
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(S2C_UpdatePlayerStateBroadcast::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_player_info(::flatbuffers::Offset<PacketData::PlayerInfo> player_info) {
+    fbb_.AddOffset(S2C_UpdatePlayerStateBroadcast::VT_PLAYER_INFO, player_info);
+  }
+  explicit S2C_UpdatePlayerStateBroadcastBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_UpdatePlayerStateBroadcast> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_UpdatePlayerStateBroadcast>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_UpdatePlayerStateBroadcast> CreateS2C_UpdatePlayerStateBroadcast(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t session_id = 0,
+    int8_t player_index = 0,
+    ::flatbuffers::Offset<PacketData::PlayerInfo> player_info = 0) {
+  S2C_UpdatePlayerStateBroadcastBuilder builder_(_fbb);
+  builder_.add_player_info(player_info);
+  builder_.add_session_id(session_id);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct C2S_UpdateCurPlayerState FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_UpdateCurPlayerStateBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_SESSION_ID = 4,
+    VT_PLAYER_INDEX = 6,
+    VT_CURRENT_HEALTH = 8,
+    VT_CURRENT_STAMINA = 10
+  };
+  uint32_t session_id() const {
+    return GetField<uint32_t>(VT_SESSION_ID, 0);
+  }
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  uint8_t current_health() const {
+    return GetField<uint8_t>(VT_CURRENT_HEALTH, 0);
+  }
+  uint8_t current_stamina() const {
+    return GetField<uint8_t>(VT_CURRENT_STAMINA, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CURRENT_HEALTH, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CURRENT_STAMINA, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct C2S_UpdateCurPlayerStateBuilder {
+  typedef C2S_UpdateCurPlayerState Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_session_id(uint32_t session_id) {
+    fbb_.AddElement<uint32_t>(C2S_UpdateCurPlayerState::VT_SESSION_ID, session_id, 0);
+  }
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(C2S_UpdateCurPlayerState::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_current_health(uint8_t current_health) {
+    fbb_.AddElement<uint8_t>(C2S_UpdateCurPlayerState::VT_CURRENT_HEALTH, current_health, 0);
+  }
+  void add_current_stamina(uint8_t current_stamina) {
+    fbb_.AddElement<uint8_t>(C2S_UpdateCurPlayerState::VT_CURRENT_STAMINA, current_stamina, 0);
+  }
+  explicit C2S_UpdateCurPlayerStateBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<C2S_UpdateCurPlayerState> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<C2S_UpdateCurPlayerState>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<C2S_UpdateCurPlayerState> CreateC2S_UpdateCurPlayerState(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t session_id = 0,
+    int8_t player_index = 0,
+    uint8_t current_health = 0,
+    uint8_t current_stamina = 0) {
+  C2S_UpdateCurPlayerStateBuilder builder_(_fbb);
+  builder_.add_session_id(session_id);
+  builder_.add_current_stamina(current_stamina);
+  builder_.add_current_health(current_health);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct S2C_UpdateCurPlayerStateBroadcast FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_UpdateCurPlayerStateBroadcastBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_SESSION_ID = 4,
+    VT_PLAYER_INDEX = 6,
+    VT_CURRENT_HEALTH = 8,
+    VT_CURRENT_STAMINA = 10
+  };
+  uint32_t session_id() const {
+    return GetField<uint32_t>(VT_SESSION_ID, 0);
+  }
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  uint8_t current_health() const {
+    return GetField<uint8_t>(VT_CURRENT_HEALTH, 0);
+  }
+  uint8_t current_stamina() const {
+    return GetField<uint8_t>(VT_CURRENT_STAMINA, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CURRENT_HEALTH, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CURRENT_STAMINA, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_UpdateCurPlayerStateBroadcastBuilder {
+  typedef S2C_UpdateCurPlayerStateBroadcast Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_session_id(uint32_t session_id) {
+    fbb_.AddElement<uint32_t>(S2C_UpdateCurPlayerStateBroadcast::VT_SESSION_ID, session_id, 0);
+  }
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(S2C_UpdateCurPlayerStateBroadcast::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_current_health(uint8_t current_health) {
+    fbb_.AddElement<uint8_t>(S2C_UpdateCurPlayerStateBroadcast::VT_CURRENT_HEALTH, current_health, 0);
+  }
+  void add_current_stamina(uint8_t current_stamina) {
+    fbb_.AddElement<uint8_t>(S2C_UpdateCurPlayerStateBroadcast::VT_CURRENT_STAMINA, current_stamina, 0);
+  }
+  explicit S2C_UpdateCurPlayerStateBroadcastBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_UpdateCurPlayerStateBroadcast> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_UpdateCurPlayerStateBroadcast>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_UpdateCurPlayerStateBroadcast> CreateS2C_UpdateCurPlayerStateBroadcast(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t session_id = 0,
+    int8_t player_index = 0,
+    uint8_t current_health = 0,
+    uint8_t current_stamina = 0) {
+  S2C_UpdateCurPlayerStateBroadcastBuilder builder_(_fbb);
+  builder_.add_session_id(session_id);
+  builder_.add_current_stamina(current_stamina);
+  builder_.add_current_health(current_health);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct C2S_GetPlayerData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_GetPlayerDataBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_SESSION_ID = 4,
+    VT_PLAYER_INDEX = 6
+  };
+  uint32_t session_id() const {
+    return GetField<uint32_t>(VT_SESSION_ID, 0);
+  }
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct C2S_GetPlayerDataBuilder {
+  typedef C2S_GetPlayerData Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_session_id(uint32_t session_id) {
+    fbb_.AddElement<uint32_t>(C2S_GetPlayerData::VT_SESSION_ID, session_id, 0);
+  }
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(C2S_GetPlayerData::VT_PLAYER_INDEX, player_index, 0);
+  }
+  explicit C2S_GetPlayerDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<C2S_GetPlayerData> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<C2S_GetPlayerData>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<C2S_GetPlayerData> CreateC2S_GetPlayerData(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t session_id = 0,
+    int8_t player_index = 0) {
+  C2S_GetPlayerDataBuilder builder_(_fbb);
+  builder_.add_session_id(session_id);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct S2C_GetPlayerDataResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_GetPlayerDataResponseBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_PLAYER_INDEX = 4,
+    VT_PLAYER_INFO = 6
+  };
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  const PacketData::PlayerInfo *player_info() const {
+    return GetPointer<const PacketData::PlayerInfo *>(VT_PLAYER_INFO);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           VerifyOffset(verifier, VT_PLAYER_INFO) &&
+           verifier.VerifyTable(player_info()) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_GetPlayerDataResponseBuilder {
+  typedef S2C_GetPlayerDataResponse Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(S2C_GetPlayerDataResponse::VT_PLAYER_INDEX, player_index, 0);
+  }
+  void add_player_info(::flatbuffers::Offset<PacketData::PlayerInfo> player_info) {
+    fbb_.AddOffset(S2C_GetPlayerDataResponse::VT_PLAYER_INFO, player_info);
+  }
+  explicit S2C_GetPlayerDataResponseBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_GetPlayerDataResponse> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_GetPlayerDataResponse>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_GetPlayerDataResponse> CreateS2C_GetPlayerDataResponse(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    int8_t player_index = 0,
+    ::flatbuffers::Offset<PacketData::PlayerInfo> player_info = 0) {
+  S2C_GetPlayerDataResponseBuilder builder_(_fbb);
+  builder_.add_player_info(player_info);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct C2S_GetLevelData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_GetLevelDataBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_SESSION_ID = 4,
     VT_STEP = 6
@@ -314,399 +1586,379 @@ struct C2S_LevelData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   }
 };
 
-struct C2S_LevelDataBuilder {
-  typedef C2S_LevelData Table;
+struct C2S_GetLevelDataBuilder {
+  typedef C2S_GetLevelData Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
   void add_session_id(uint32_t session_id) {
-    fbb_.AddElement<uint32_t>(C2S_LevelData::VT_SESSION_ID, session_id, 0);
+    fbb_.AddElement<uint32_t>(C2S_GetLevelData::VT_SESSION_ID, session_id, 0);
   }
   void add_step(uint8_t step) {
-    fbb_.AddElement<uint8_t>(C2S_LevelData::VT_STEP, step, 0);
+    fbb_.AddElement<uint8_t>(C2S_GetLevelData::VT_STEP, step, 0);
   }
-  explicit C2S_LevelDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  explicit C2S_GetLevelDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<C2S_LevelData> Finish() {
+  ::flatbuffers::Offset<C2S_GetLevelData> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<C2S_LevelData>(end);
+    auto o = ::flatbuffers::Offset<C2S_GetLevelData>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<C2S_LevelData> CreateC2S_LevelData(
+inline ::flatbuffers::Offset<C2S_GetLevelData> CreateC2S_GetLevelData(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t session_id = 0,
     uint8_t step = 0) {
-  C2S_LevelDataBuilder builder_(_fbb);
+  C2S_GetLevelDataBuilder builder_(_fbb);
   builder_.add_session_id(session_id);
   builder_.add_step(step);
   return builder_.Finish();
 }
 
-struct S2C_LevelData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef S2C_LevelDataBuilder Builder;
+struct S2C_GetLevelDataResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_GetLevelDataResponseBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_LEVEL = 4
+    VT_MAP_LEVEL = 4
   };
-  const PacketData::Level *level() const {
-    return GetStruct<const PacketData::Level *>(VT_LEVEL);
+  const PacketData::MapLevel *map_level() const {
+    return GetStruct<const PacketData::MapLevel *>(VT_MAP_LEVEL);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<PacketData::Level>(verifier, VT_LEVEL, 4) &&
+           VerifyField<PacketData::MapLevel>(verifier, VT_MAP_LEVEL, 4) &&
            verifier.EndTable();
   }
 };
 
-struct S2C_LevelDataBuilder {
-  typedef S2C_LevelData Table;
+struct S2C_GetLevelDataResponseBuilder {
+  typedef S2C_GetLevelDataResponse Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
-  void add_level(const PacketData::Level *level) {
-    fbb_.AddStruct(S2C_LevelData::VT_LEVEL, level);
+  void add_map_level(const PacketData::MapLevel *map_level) {
+    fbb_.AddStruct(S2C_GetLevelDataResponse::VT_MAP_LEVEL, map_level);
   }
-  explicit S2C_LevelDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  explicit S2C_GetLevelDataResponseBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<S2C_LevelData> Finish() {
+  ::flatbuffers::Offset<S2C_GetLevelDataResponse> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<S2C_LevelData>(end);
+    auto o = ::flatbuffers::Offset<S2C_GetLevelDataResponse>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<S2C_LevelData> CreateS2C_LevelData(
+inline ::flatbuffers::Offset<S2C_GetLevelDataResponse> CreateS2C_GetLevelDataResponse(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    const PacketData::Level *level = nullptr) {
-  S2C_LevelDataBuilder builder_(_fbb);
-  builder_.add_level(level);
+    const PacketData::MapLevel *map_level = nullptr) {
+  S2C_GetLevelDataResponseBuilder builder_(_fbb);
+  builder_.add_map_level(map_level);
   return builder_.Finish();
 }
 
-struct C2S_MonsterData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef C2S_MonsterDataBuilder Builder;
+struct C2S_CreateSession FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_CreateSessionBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_MONSTER_TYPE = 4
+    VT_HOST_NICKNAME = 4,
+    VT_IP_ADDRESS = 6
   };
-  PacketData::MonsterType monster_type() const {
-    return static_cast<PacketData::MonsterType>(GetField<int8_t>(VT_MONSTER_TYPE, 0));
+  const ::flatbuffers::String *host_nickname() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_HOST_NICKNAME);
+  }
+  const ::flatbuffers::String *ip_address() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_IP_ADDRESS);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<int8_t>(verifier, VT_MONSTER_TYPE, 1) &&
+           VerifyOffset(verifier, VT_HOST_NICKNAME) &&
+           verifier.VerifyString(host_nickname()) &&
+           VerifyOffset(verifier, VT_IP_ADDRESS) &&
+           verifier.VerifyString(ip_address()) &&
            verifier.EndTable();
   }
 };
 
-struct C2S_MonsterDataBuilder {
-  typedef C2S_MonsterData Table;
+struct C2S_CreateSessionBuilder {
+  typedef C2S_CreateSession Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
-  void add_monster_type(PacketData::MonsterType monster_type) {
-    fbb_.AddElement<int8_t>(C2S_MonsterData::VT_MONSTER_TYPE, static_cast<int8_t>(monster_type), 0);
+  void add_host_nickname(::flatbuffers::Offset<::flatbuffers::String> host_nickname) {
+    fbb_.AddOffset(C2S_CreateSession::VT_HOST_NICKNAME, host_nickname);
   }
-  explicit C2S_MonsterDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  void add_ip_address(::flatbuffers::Offset<::flatbuffers::String> ip_address) {
+    fbb_.AddOffset(C2S_CreateSession::VT_IP_ADDRESS, ip_address);
+  }
+  explicit C2S_CreateSessionBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<C2S_MonsterData> Finish() {
+  ::flatbuffers::Offset<C2S_CreateSession> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<C2S_MonsterData>(end);
+    auto o = ::flatbuffers::Offset<C2S_CreateSession>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<C2S_MonsterData> CreateC2S_MonsterData(
+inline ::flatbuffers::Offset<C2S_CreateSession> CreateC2S_CreateSession(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    PacketData::MonsterType monster_type = PacketData::MonsterType_Test) {
-  C2S_MonsterDataBuilder builder_(_fbb);
-  builder_.add_monster_type(monster_type);
+    ::flatbuffers::Offset<::flatbuffers::String> host_nickname = 0,
+    ::flatbuffers::Offset<::flatbuffers::String> ip_address = 0) {
+  C2S_CreateSessionBuilder builder_(_fbb);
+  builder_.add_ip_address(ip_address);
+  builder_.add_host_nickname(host_nickname);
   return builder_.Finish();
 }
 
-struct S2C_MonsterData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef S2C_MonsterDataBuilder Builder;
+inline ::flatbuffers::Offset<C2S_CreateSession> CreateC2S_CreateSessionDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    const char *host_nickname = nullptr,
+    const char *ip_address = nullptr) {
+  auto host_nickname__ = host_nickname ? _fbb.CreateString(host_nickname) : 0;
+  auto ip_address__ = ip_address ? _fbb.CreateString(ip_address) : 0;
+  return PacketData::CreateC2S_CreateSession(
+      _fbb,
+      host_nickname__,
+      ip_address__);
+}
+
+struct S2C_CreateSessionResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_CreateSessionResponseBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_MONSTER_STAT = 4
+    VT_SESSION_INFO = 4
   };
-  const PacketData::MonsterStat *monster_stat() const {
-    return GetStruct<const PacketData::MonsterStat *>(VT_MONSTER_STAT);
+  const PacketData::SessionInfo *session_info() const {
+    return GetPointer<const PacketData::SessionInfo *>(VT_SESSION_INFO);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<PacketData::MonsterStat>(verifier, VT_MONSTER_STAT, 1) &&
+           VerifyOffset(verifier, VT_SESSION_INFO) &&
+           verifier.VerifyTable(session_info()) &&
            verifier.EndTable();
   }
 };
 
-struct S2C_MonsterDataBuilder {
-  typedef S2C_MonsterData Table;
+struct S2C_CreateSessionResponseBuilder {
+  typedef S2C_CreateSessionResponse Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
-  void add_monster_stat(const PacketData::MonsterStat *monster_stat) {
-    fbb_.AddStruct(S2C_MonsterData::VT_MONSTER_STAT, monster_stat);
+  void add_session_info(::flatbuffers::Offset<PacketData::SessionInfo> session_info) {
+    fbb_.AddOffset(S2C_CreateSessionResponse::VT_SESSION_INFO, session_info);
   }
-  explicit S2C_MonsterDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  explicit S2C_CreateSessionResponseBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<S2C_MonsterData> Finish() {
+  ::flatbuffers::Offset<S2C_CreateSessionResponse> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<S2C_MonsterData>(end);
+    auto o = ::flatbuffers::Offset<S2C_CreateSessionResponse>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<S2C_MonsterData> CreateS2C_MonsterData(
+inline ::flatbuffers::Offset<S2C_CreateSessionResponse> CreateS2C_CreateSessionResponse(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    const PacketData::MonsterStat *monster_stat = nullptr) {
-  S2C_MonsterDataBuilder builder_(_fbb);
-  builder_.add_monster_stat(monster_stat);
+    ::flatbuffers::Offset<PacketData::SessionInfo> session_info = 0) {
+  S2C_CreateSessionResponseBuilder builder_(_fbb);
+  builder_.add_session_info(session_info);
   return builder_.Finish();
 }
 
-struct C2S_SessionData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef C2S_SessionDataBuilder Builder;
+struct S2C_UpdateSessionBroadcast FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_UpdateSessionBroadcastBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_SESSION_ID = 4
+    VT_SESSION_INFO = 4
   };
-  uint32_t session_id() const {
-    return GetField<uint32_t>(VT_SESSION_ID, 0);
+  const PacketData::SessionInfo *session_info() const {
+    return GetPointer<const PacketData::SessionInfo *>(VT_SESSION_INFO);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
+           VerifyOffset(verifier, VT_SESSION_INFO) &&
+           verifier.VerifyTable(session_info()) &&
            verifier.EndTable();
   }
 };
 
-struct C2S_SessionDataBuilder {
-  typedef C2S_SessionData Table;
+struct S2C_UpdateSessionBroadcastBuilder {
+  typedef S2C_UpdateSessionBroadcast Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
-  void add_session_id(uint32_t session_id) {
-    fbb_.AddElement<uint32_t>(C2S_SessionData::VT_SESSION_ID, session_id, 0);
+  void add_session_info(::flatbuffers::Offset<PacketData::SessionInfo> session_info) {
+    fbb_.AddOffset(S2C_UpdateSessionBroadcast::VT_SESSION_INFO, session_info);
   }
-  explicit C2S_SessionDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  explicit S2C_UpdateSessionBroadcastBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<C2S_SessionData> Finish() {
+  ::flatbuffers::Offset<S2C_UpdateSessionBroadcast> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<C2S_SessionData>(end);
+    auto o = ::flatbuffers::Offset<S2C_UpdateSessionBroadcast>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<C2S_SessionData> CreateC2S_SessionData(
+inline ::flatbuffers::Offset<S2C_UpdateSessionBroadcast> CreateS2C_UpdateSessionBroadcast(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t session_id = 0) {
-  C2S_SessionDataBuilder builder_(_fbb);
-  builder_.add_session_id(session_id);
+    ::flatbuffers::Offset<PacketData::SessionInfo> session_info = 0) {
+  S2C_UpdateSessionBroadcastBuilder builder_(_fbb);
+  builder_.add_session_info(session_info);
   return builder_.Finish();
 }
 
-struct S2C_SessionData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef S2C_SessionDataBuilder Builder;
+struct C2S_JoinSession FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_JoinSessionBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_SESSION_ID = 4,
-    VT_STEP = 6,
-    VT_ALL_PLAYER_ID = 8,
-    VT_USABLE_MONEY = 10,
-    VT_NOW_ROUND = 12
+    VT_PLAYER_NICKNAME = 6
   };
   uint32_t session_id() const {
     return GetField<uint32_t>(VT_SESSION_ID, 0);
   }
-  uint8_t step() const {
-    return GetField<uint8_t>(VT_STEP, 0);
-  }
-  const ::flatbuffers::Vector<uint32_t> *all_player_id() const {
-    return GetPointer<const ::flatbuffers::Vector<uint32_t> *>(VT_ALL_PLAYER_ID);
-  }
-  uint32_t usable_money() const {
-    return GetField<uint32_t>(VT_USABLE_MONEY, 0);
-  }
-  uint8_t now_round() const {
-    return GetField<uint8_t>(VT_NOW_ROUND, 0);
+  const ::flatbuffers::String *player_nickname() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_PLAYER_NICKNAME);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
-           VerifyField<uint8_t>(verifier, VT_STEP, 1) &&
-           VerifyOffset(verifier, VT_ALL_PLAYER_ID) &&
-           verifier.VerifyVector(all_player_id()) &&
-           VerifyField<uint32_t>(verifier, VT_USABLE_MONEY, 4) &&
-           VerifyField<uint8_t>(verifier, VT_NOW_ROUND, 1) &&
+           VerifyOffset(verifier, VT_PLAYER_NICKNAME) &&
+           verifier.VerifyString(player_nickname()) &&
            verifier.EndTable();
   }
 };
 
-struct S2C_SessionDataBuilder {
-  typedef S2C_SessionData Table;
+struct C2S_JoinSessionBuilder {
+  typedef C2S_JoinSession Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
   void add_session_id(uint32_t session_id) {
-    fbb_.AddElement<uint32_t>(S2C_SessionData::VT_SESSION_ID, session_id, 0);
+    fbb_.AddElement<uint32_t>(C2S_JoinSession::VT_SESSION_ID, session_id, 0);
   }
-  void add_step(uint8_t step) {
-    fbb_.AddElement<uint8_t>(S2C_SessionData::VT_STEP, step, 0);
+  void add_player_nickname(::flatbuffers::Offset<::flatbuffers::String> player_nickname) {
+    fbb_.AddOffset(C2S_JoinSession::VT_PLAYER_NICKNAME, player_nickname);
   }
-  void add_all_player_id(::flatbuffers::Offset<::flatbuffers::Vector<uint32_t>> all_player_id) {
-    fbb_.AddOffset(S2C_SessionData::VT_ALL_PLAYER_ID, all_player_id);
-  }
-  void add_usable_money(uint32_t usable_money) {
-    fbb_.AddElement<uint32_t>(S2C_SessionData::VT_USABLE_MONEY, usable_money, 0);
-  }
-  void add_now_round(uint8_t now_round) {
-    fbb_.AddElement<uint8_t>(S2C_SessionData::VT_NOW_ROUND, now_round, 0);
-  }
-  explicit S2C_SessionDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  explicit C2S_JoinSessionBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<S2C_SessionData> Finish() {
+  ::flatbuffers::Offset<C2S_JoinSession> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<S2C_SessionData>(end);
+    auto o = ::flatbuffers::Offset<C2S_JoinSession>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<S2C_SessionData> CreateS2C_SessionData(
+inline ::flatbuffers::Offset<C2S_JoinSession> CreateC2S_JoinSession(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t session_id = 0,
-    uint8_t step = 0,
-    ::flatbuffers::Offset<::flatbuffers::Vector<uint32_t>> all_player_id = 0,
-    uint32_t usable_money = 0,
-    uint8_t now_round = 0) {
-  S2C_SessionDataBuilder builder_(_fbb);
-  builder_.add_usable_money(usable_money);
-  builder_.add_all_player_id(all_player_id);
+    ::flatbuffers::Offset<::flatbuffers::String> player_nickname = 0) {
+  C2S_JoinSessionBuilder builder_(_fbb);
+  builder_.add_player_nickname(player_nickname);
   builder_.add_session_id(session_id);
-  builder_.add_now_round(now_round);
-  builder_.add_step(step);
   return builder_.Finish();
 }
 
-inline ::flatbuffers::Offset<S2C_SessionData> CreateS2C_SessionDataDirect(
+inline ::flatbuffers::Offset<C2S_JoinSession> CreateC2S_JoinSessionDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t session_id = 0,
-    uint8_t step = 0,
-    const std::vector<uint32_t> *all_player_id = nullptr,
-    uint32_t usable_money = 0,
-    uint8_t now_round = 0) {
-  auto all_player_id__ = all_player_id ? _fbb.CreateVector<uint32_t>(*all_player_id) : 0;
-  return PacketData::CreateS2C_SessionData(
+    const char *player_nickname = nullptr) {
+  auto player_nickname__ = player_nickname ? _fbb.CreateString(player_nickname) : 0;
+  return PacketData::CreateC2S_JoinSession(
       _fbb,
       session_id,
-      step,
-      all_player_id__,
-      usable_money,
-      now_round);
+      player_nickname__);
 }
 
-struct C2S_PlayerData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef C2S_PlayerDataBuilder Builder;
+struct S2C_JoinSessionResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef S2C_JoinSessionResponseBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_PLAYER_INDEX = 4
+  };
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct S2C_JoinSessionResponseBuilder {
+  typedef S2C_JoinSessionResponse Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(S2C_JoinSessionResponse::VT_PLAYER_INDEX, player_index, 0);
+  }
+  explicit S2C_JoinSessionResponseBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<S2C_JoinSessionResponse> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<S2C_JoinSessionResponse>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<S2C_JoinSessionResponse> CreateS2C_JoinSessionResponse(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    int8_t player_index = 0) {
+  S2C_JoinSessionResponseBuilder builder_(_fbb);
+  builder_.add_player_index(player_index);
+  return builder_.Finish();
+}
+
+struct C2S_LeaveSession FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef C2S_LeaveSessionBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_SESSION_ID = 4,
-    VT_PLAYER_ID = 6
+    VT_PLAYER_INDEX = 6
   };
   uint32_t session_id() const {
     return GetField<uint32_t>(VT_SESSION_ID, 0);
   }
-  uint32_t player_id() const {
-    return GetField<uint32_t>(VT_PLAYER_ID, 0);
+  int8_t player_index() const {
+    return GetField<int8_t>(VT_PLAYER_INDEX, 0);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_SESSION_ID, 4) &&
-           VerifyField<uint32_t>(verifier, VT_PLAYER_ID, 4) &&
+           VerifyField<int8_t>(verifier, VT_PLAYER_INDEX, 1) &&
            verifier.EndTable();
   }
 };
 
-struct C2S_PlayerDataBuilder {
-  typedef C2S_PlayerData Table;
+struct C2S_LeaveSessionBuilder {
+  typedef C2S_LeaveSession Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
   void add_session_id(uint32_t session_id) {
-    fbb_.AddElement<uint32_t>(C2S_PlayerData::VT_SESSION_ID, session_id, 0);
+    fbb_.AddElement<uint32_t>(C2S_LeaveSession::VT_SESSION_ID, session_id, 0);
   }
-  void add_player_id(uint32_t player_id) {
-    fbb_.AddElement<uint32_t>(C2S_PlayerData::VT_PLAYER_ID, player_id, 0);
+  void add_player_index(int8_t player_index) {
+    fbb_.AddElement<int8_t>(C2S_LeaveSession::VT_PLAYER_INDEX, player_index, 0);
   }
-  explicit C2S_PlayerDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+  explicit C2S_LeaveSessionBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  ::flatbuffers::Offset<C2S_PlayerData> Finish() {
+  ::flatbuffers::Offset<C2S_LeaveSession> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<C2S_PlayerData>(end);
+    auto o = ::flatbuffers::Offset<C2S_LeaveSession>(end);
     return o;
   }
 };
 
-inline ::flatbuffers::Offset<C2S_PlayerData> CreateC2S_PlayerData(
+inline ::flatbuffers::Offset<C2S_LeaveSession> CreateC2S_LeaveSession(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t session_id = 0,
-    uint32_t player_id = 0) {
-  C2S_PlayerDataBuilder builder_(_fbb);
-  builder_.add_player_id(player_id);
+    int8_t player_index = 0) {
+  C2S_LeaveSessionBuilder builder_(_fbb);
   builder_.add_session_id(session_id);
-  return builder_.Finish();
-}
-
-struct S2C_PlayerData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef S2C_PlayerDataBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_PLAYER_ID = 4,
-    VT_PLAYER_STAT = 6
-  };
-  uint32_t player_id() const {
-    return GetField<uint32_t>(VT_PLAYER_ID, 0);
-  }
-  const PacketData::PlayerStat *player_stat() const {
-    return GetStruct<const PacketData::PlayerStat *>(VT_PLAYER_STAT);
-  }
-  bool Verify(::flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, VT_PLAYER_ID, 4) &&
-           VerifyField<PacketData::PlayerStat>(verifier, VT_PLAYER_STAT, 1) &&
-           verifier.EndTable();
-  }
-};
-
-struct S2C_PlayerDataBuilder {
-  typedef S2C_PlayerData Table;
-  ::flatbuffers::FlatBufferBuilder &fbb_;
-  ::flatbuffers::uoffset_t start_;
-  void add_player_id(uint32_t player_id) {
-    fbb_.AddElement<uint32_t>(S2C_PlayerData::VT_PLAYER_ID, player_id, 0);
-  }
-  void add_player_stat(const PacketData::PlayerStat *player_stat) {
-    fbb_.AddStruct(S2C_PlayerData::VT_PLAYER_STAT, player_stat);
-  }
-  explicit S2C_PlayerDataBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  ::flatbuffers::Offset<S2C_PlayerData> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<S2C_PlayerData>(end);
-    return o;
-  }
-};
-
-inline ::flatbuffers::Offset<S2C_PlayerData> CreateS2C_PlayerData(
-    ::flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t player_id = 0,
-    const PacketData::PlayerStat *player_stat = nullptr) {
-  S2C_PlayerDataBuilder builder_(_fbb);
-  builder_.add_player_stat(player_stat);
-  builder_.add_player_id(player_id);
+  builder_.add_player_index(player_index);
   return builder_.Finish();
 }
 
@@ -714,83 +1966,181 @@ struct Packet FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef PacketBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TIMESTAMP = 4,
-    VT_TYPE_TYPE = 6,
-    VT_TYPE = 8
+    VT_PACKET_PAY_LOAD_TYPE = 6,
+    VT_PACKET_PAY_LOAD = 8
   };
   uint64_t timestamp() const {
     return GetField<uint64_t>(VT_TIMESTAMP, 0);
   }
-  PacketData::PacketType type_type() const {
-    return static_cast<PacketData::PacketType>(GetField<uint8_t>(VT_TYPE_TYPE, 0));
+  PacketData::PacketPayload packet_pay_load_type() const {
+    return static_cast<PacketData::PacketPayload>(GetField<uint8_t>(VT_PACKET_PAY_LOAD_TYPE, 0));
   }
-  const void *type() const {
-    return GetPointer<const void *>(VT_TYPE);
+  const void *packet_pay_load() const {
+    return GetPointer<const void *>(VT_PACKET_PAY_LOAD);
   }
-  template<typename T> const T *type_as() const;
-  const PacketData::C2S_LevelData *type_as_C2S_LevelData() const {
-    return type_type() == PacketData::PacketType_C2S_LevelData ? static_cast<const PacketData::C2S_LevelData *>(type()) : nullptr;
+  template<typename T> const T *packet_pay_load_as() const;
+  const PacketData::C2S_GetLevelData *packet_pay_load_as_C2S_GetLevelData() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_GetLevelData ? static_cast<const PacketData::C2S_GetLevelData *>(packet_pay_load()) : nullptr;
   }
-  const PacketData::S2C_LevelData *type_as_S2C_LevelData() const {
-    return type_type() == PacketData::PacketType_S2C_LevelData ? static_cast<const PacketData::S2C_LevelData *>(type()) : nullptr;
+  const PacketData::S2C_GetLevelDataResponse *packet_pay_load_as_S2C_GetLevelDataResponse() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_GetLevelDataResponse ? static_cast<const PacketData::S2C_GetLevelDataResponse *>(packet_pay_load()) : nullptr;
   }
-  const PacketData::C2S_MonsterData *type_as_C2S_MonsterData() const {
-    return type_type() == PacketData::PacketType_C2S_MonsterData ? static_cast<const PacketData::C2S_MonsterData *>(type()) : nullptr;
+  const PacketData::C2S_GetMonsterData *packet_pay_load_as_C2S_GetMonsterData() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_GetMonsterData ? static_cast<const PacketData::C2S_GetMonsterData *>(packet_pay_load()) : nullptr;
   }
-  const PacketData::S2C_MonsterData *type_as_S2C_MonsterData() const {
-    return type_type() == PacketData::PacketType_S2C_MonsterData ? static_cast<const PacketData::S2C_MonsterData *>(type()) : nullptr;
+  const PacketData::S2C_GetMonsterDataResponse *packet_pay_load_as_S2C_GetMonsterDataResponse() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_GetMonsterDataResponse ? static_cast<const PacketData::S2C_GetMonsterDataResponse *>(packet_pay_load()) : nullptr;
   }
-  const PacketData::C2S_SessionData *type_as_C2S_SessionData() const {
-    return type_type() == PacketData::PacketType_C2S_SessionData ? static_cast<const PacketData::C2S_SessionData *>(type()) : nullptr;
+  const PacketData::C2S_GetMonsterInstanceData *packet_pay_load_as_C2S_GetMonsterInstanceData() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_GetMonsterInstanceData ? static_cast<const PacketData::C2S_GetMonsterInstanceData *>(packet_pay_load()) : nullptr;
   }
-  const PacketData::S2C_SessionData *type_as_S2C_SessionData() const {
-    return type_type() == PacketData::PacketType_S2C_SessionData ? static_cast<const PacketData::S2C_SessionData *>(type()) : nullptr;
+  const PacketData::S2C_GetMonsterInstanceDataResponse *packet_pay_load_as_S2C_GetMonsterInstanceDataResponse() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_GetMonsterInstanceDataResponse ? static_cast<const PacketData::S2C_GetMonsterInstanceDataResponse *>(packet_pay_load()) : nullptr;
   }
-  const PacketData::C2S_PlayerData *type_as_C2S_PlayerData() const {
-    return type_type() == PacketData::PacketType_C2S_PlayerData ? static_cast<const PacketData::C2S_PlayerData *>(type()) : nullptr;
+  const PacketData::C2S_CreateSession *packet_pay_load_as_C2S_CreateSession() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_CreateSession ? static_cast<const PacketData::C2S_CreateSession *>(packet_pay_load()) : nullptr;
   }
-  const PacketData::S2C_PlayerData *type_as_S2C_PlayerData() const {
-    return type_type() == PacketData::PacketType_S2C_PlayerData ? static_cast<const PacketData::S2C_PlayerData *>(type()) : nullptr;
+  const PacketData::S2C_CreateSessionResponse *packet_pay_load_as_S2C_CreateSessionResponse() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_CreateSessionResponse ? static_cast<const PacketData::S2C_CreateSessionResponse *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::C2S_JoinSession *packet_pay_load_as_C2S_JoinSession() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_JoinSession ? static_cast<const PacketData::C2S_JoinSession *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::S2C_JoinSessionResponse *packet_pay_load_as_S2C_JoinSessionResponse() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_JoinSessionResponse ? static_cast<const PacketData::S2C_JoinSessionResponse *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::C2S_LeaveSession *packet_pay_load_as_C2S_LeaveSession() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_LeaveSession ? static_cast<const PacketData::C2S_LeaveSession *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::S2C_UpdateSessionBroadcast *packet_pay_load_as_S2C_UpdateSessionBroadcast() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_UpdateSessionBroadcast ? static_cast<const PacketData::S2C_UpdateSessionBroadcast *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::C2S_GetPlayerData *packet_pay_load_as_C2S_GetPlayerData() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_GetPlayerData ? static_cast<const PacketData::C2S_GetPlayerData *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::S2C_GetPlayerDataResponse *packet_pay_load_as_S2C_GetPlayerDataResponse() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_GetPlayerDataResponse ? static_cast<const PacketData::S2C_GetPlayerDataResponse *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::C2S_UpdatePlayerState *packet_pay_load_as_C2S_UpdatePlayerState() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_UpdatePlayerState ? static_cast<const PacketData::C2S_UpdatePlayerState *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::S2C_UpdatePlayerStateBroadcast *packet_pay_load_as_S2C_UpdatePlayerStateBroadcast() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_UpdatePlayerStateBroadcast ? static_cast<const PacketData::S2C_UpdatePlayerStateBroadcast *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::C2S_UpdateCurPlayerState *packet_pay_load_as_C2S_UpdateCurPlayerState() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_UpdateCurPlayerState ? static_cast<const PacketData::C2S_UpdateCurPlayerState *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::S2C_UpdateCurPlayerStateBroadcast *packet_pay_load_as_S2C_UpdateCurPlayerStateBroadcast() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_UpdateCurPlayerStateBroadcast ? static_cast<const PacketData::S2C_UpdateCurPlayerStateBroadcast *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::C2S_DamageToMonster *packet_pay_load_as_C2S_DamageToMonster() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_DamageToMonster ? static_cast<const PacketData::C2S_DamageToMonster *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::S2C_DamageToMonsterBroadcast *packet_pay_load_as_S2C_DamageToMonsterBroadcast() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_DamageToMonsterBroadcast ? static_cast<const PacketData::S2C_DamageToMonsterBroadcast *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::C2S_DamageByMonster *packet_pay_load_as_C2S_DamageByMonster() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_C2S_DamageByMonster ? static_cast<const PacketData::C2S_DamageByMonster *>(packet_pay_load()) : nullptr;
+  }
+  const PacketData::S2C_DamageByMonsterBroadcast *packet_pay_load_as_S2C_DamageByMonsterBroadcast() const {
+    return packet_pay_load_type() == PacketData::PacketPayload_S2C_DamageByMonsterBroadcast ? static_cast<const PacketData::S2C_DamageByMonsterBroadcast *>(packet_pay_load()) : nullptr;
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint64_t>(verifier, VT_TIMESTAMP, 8) &&
-           VerifyField<uint8_t>(verifier, VT_TYPE_TYPE, 1) &&
-           VerifyOffset(verifier, VT_TYPE) &&
-           VerifyPacketType(verifier, type(), type_type()) &&
+           VerifyField<uint8_t>(verifier, VT_PACKET_PAY_LOAD_TYPE, 1) &&
+           VerifyOffset(verifier, VT_PACKET_PAY_LOAD) &&
+           VerifyPacketPayload(verifier, packet_pay_load(), packet_pay_load_type()) &&
            verifier.EndTable();
   }
 };
 
-template<> inline const PacketData::C2S_LevelData *Packet::type_as<PacketData::C2S_LevelData>() const {
-  return type_as_C2S_LevelData();
+template<> inline const PacketData::C2S_GetLevelData *Packet::packet_pay_load_as<PacketData::C2S_GetLevelData>() const {
+  return packet_pay_load_as_C2S_GetLevelData();
 }
 
-template<> inline const PacketData::S2C_LevelData *Packet::type_as<PacketData::S2C_LevelData>() const {
-  return type_as_S2C_LevelData();
+template<> inline const PacketData::S2C_GetLevelDataResponse *Packet::packet_pay_load_as<PacketData::S2C_GetLevelDataResponse>() const {
+  return packet_pay_load_as_S2C_GetLevelDataResponse();
 }
 
-template<> inline const PacketData::C2S_MonsterData *Packet::type_as<PacketData::C2S_MonsterData>() const {
-  return type_as_C2S_MonsterData();
+template<> inline const PacketData::C2S_GetMonsterData *Packet::packet_pay_load_as<PacketData::C2S_GetMonsterData>() const {
+  return packet_pay_load_as_C2S_GetMonsterData();
 }
 
-template<> inline const PacketData::S2C_MonsterData *Packet::type_as<PacketData::S2C_MonsterData>() const {
-  return type_as_S2C_MonsterData();
+template<> inline const PacketData::S2C_GetMonsterDataResponse *Packet::packet_pay_load_as<PacketData::S2C_GetMonsterDataResponse>() const {
+  return packet_pay_load_as_S2C_GetMonsterDataResponse();
 }
 
-template<> inline const PacketData::C2S_SessionData *Packet::type_as<PacketData::C2S_SessionData>() const {
-  return type_as_C2S_SessionData();
+template<> inline const PacketData::C2S_GetMonsterInstanceData *Packet::packet_pay_load_as<PacketData::C2S_GetMonsterInstanceData>() const {
+  return packet_pay_load_as_C2S_GetMonsterInstanceData();
 }
 
-template<> inline const PacketData::S2C_SessionData *Packet::type_as<PacketData::S2C_SessionData>() const {
-  return type_as_S2C_SessionData();
+template<> inline const PacketData::S2C_GetMonsterInstanceDataResponse *Packet::packet_pay_load_as<PacketData::S2C_GetMonsterInstanceDataResponse>() const {
+  return packet_pay_load_as_S2C_GetMonsterInstanceDataResponse();
 }
 
-template<> inline const PacketData::C2S_PlayerData *Packet::type_as<PacketData::C2S_PlayerData>() const {
-  return type_as_C2S_PlayerData();
+template<> inline const PacketData::C2S_CreateSession *Packet::packet_pay_load_as<PacketData::C2S_CreateSession>() const {
+  return packet_pay_load_as_C2S_CreateSession();
 }
 
-template<> inline const PacketData::S2C_PlayerData *Packet::type_as<PacketData::S2C_PlayerData>() const {
-  return type_as_S2C_PlayerData();
+template<> inline const PacketData::S2C_CreateSessionResponse *Packet::packet_pay_load_as<PacketData::S2C_CreateSessionResponse>() const {
+  return packet_pay_load_as_S2C_CreateSessionResponse();
+}
+
+template<> inline const PacketData::C2S_JoinSession *Packet::packet_pay_load_as<PacketData::C2S_JoinSession>() const {
+  return packet_pay_load_as_C2S_JoinSession();
+}
+
+template<> inline const PacketData::S2C_JoinSessionResponse *Packet::packet_pay_load_as<PacketData::S2C_JoinSessionResponse>() const {
+  return packet_pay_load_as_S2C_JoinSessionResponse();
+}
+
+template<> inline const PacketData::C2S_LeaveSession *Packet::packet_pay_load_as<PacketData::C2S_LeaveSession>() const {
+  return packet_pay_load_as_C2S_LeaveSession();
+}
+
+template<> inline const PacketData::S2C_UpdateSessionBroadcast *Packet::packet_pay_load_as<PacketData::S2C_UpdateSessionBroadcast>() const {
+  return packet_pay_load_as_S2C_UpdateSessionBroadcast();
+}
+
+template<> inline const PacketData::C2S_GetPlayerData *Packet::packet_pay_load_as<PacketData::C2S_GetPlayerData>() const {
+  return packet_pay_load_as_C2S_GetPlayerData();
+}
+
+template<> inline const PacketData::S2C_GetPlayerDataResponse *Packet::packet_pay_load_as<PacketData::S2C_GetPlayerDataResponse>() const {
+  return packet_pay_load_as_S2C_GetPlayerDataResponse();
+}
+
+template<> inline const PacketData::C2S_UpdatePlayerState *Packet::packet_pay_load_as<PacketData::C2S_UpdatePlayerState>() const {
+  return packet_pay_load_as_C2S_UpdatePlayerState();
+}
+
+template<> inline const PacketData::S2C_UpdatePlayerStateBroadcast *Packet::packet_pay_load_as<PacketData::S2C_UpdatePlayerStateBroadcast>() const {
+  return packet_pay_load_as_S2C_UpdatePlayerStateBroadcast();
+}
+
+template<> inline const PacketData::C2S_UpdateCurPlayerState *Packet::packet_pay_load_as<PacketData::C2S_UpdateCurPlayerState>() const {
+  return packet_pay_load_as_C2S_UpdateCurPlayerState();
+}
+
+template<> inline const PacketData::S2C_UpdateCurPlayerStateBroadcast *Packet::packet_pay_load_as<PacketData::S2C_UpdateCurPlayerStateBroadcast>() const {
+  return packet_pay_load_as_S2C_UpdateCurPlayerStateBroadcast();
+}
+
+template<> inline const PacketData::C2S_DamageToMonster *Packet::packet_pay_load_as<PacketData::C2S_DamageToMonster>() const {
+  return packet_pay_load_as_C2S_DamageToMonster();
+}
+
+template<> inline const PacketData::S2C_DamageToMonsterBroadcast *Packet::packet_pay_load_as<PacketData::S2C_DamageToMonsterBroadcast>() const {
+  return packet_pay_load_as_S2C_DamageToMonsterBroadcast();
+}
+
+template<> inline const PacketData::C2S_DamageByMonster *Packet::packet_pay_load_as<PacketData::C2S_DamageByMonster>() const {
+  return packet_pay_load_as_C2S_DamageByMonster();
+}
+
+template<> inline const PacketData::S2C_DamageByMonsterBroadcast *Packet::packet_pay_load_as<PacketData::S2C_DamageByMonsterBroadcast>() const {
+  return packet_pay_load_as_S2C_DamageByMonsterBroadcast();
 }
 
 struct PacketBuilder {
@@ -800,11 +2150,11 @@ struct PacketBuilder {
   void add_timestamp(uint64_t timestamp) {
     fbb_.AddElement<uint64_t>(Packet::VT_TIMESTAMP, timestamp, 0);
   }
-  void add_type_type(PacketData::PacketType type_type) {
-    fbb_.AddElement<uint8_t>(Packet::VT_TYPE_TYPE, static_cast<uint8_t>(type_type), 0);
+  void add_packet_pay_load_type(PacketData::PacketPayload packet_pay_load_type) {
+    fbb_.AddElement<uint8_t>(Packet::VT_PACKET_PAY_LOAD_TYPE, static_cast<uint8_t>(packet_pay_load_type), 0);
   }
-  void add_type(::flatbuffers::Offset<void> type) {
-    fbb_.AddOffset(Packet::VT_TYPE, type);
+  void add_packet_pay_load(::flatbuffers::Offset<void> packet_pay_load) {
+    fbb_.AddOffset(Packet::VT_PACKET_PAY_LOAD, packet_pay_load);
   }
   explicit PacketBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -820,62 +2170,118 @@ struct PacketBuilder {
 inline ::flatbuffers::Offset<Packet> CreatePacket(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint64_t timestamp = 0,
-    PacketData::PacketType type_type = PacketData::PacketType_NONE,
-    ::flatbuffers::Offset<void> type = 0) {
+    PacketData::PacketPayload packet_pay_load_type = PacketData::PacketPayload_NONE,
+    ::flatbuffers::Offset<void> packet_pay_load = 0) {
   PacketBuilder builder_(_fbb);
   builder_.add_timestamp(timestamp);
-  builder_.add_type(type);
-  builder_.add_type_type(type_type);
+  builder_.add_packet_pay_load(packet_pay_load);
+  builder_.add_packet_pay_load_type(packet_pay_load_type);
   return builder_.Finish();
 }
 
-inline bool VerifyPacketType(::flatbuffers::Verifier &verifier, const void *obj, PacketType type) {
+inline bool VerifyPacketPayload(::flatbuffers::Verifier &verifier, const void *obj, PacketPayload type) {
   switch (type) {
-    case PacketType_NONE: {
+    case PacketPayload_NONE: {
       return true;
     }
-    case PacketType_C2S_LevelData: {
-      auto ptr = reinterpret_cast<const PacketData::C2S_LevelData *>(obj);
+    case PacketPayload_C2S_GetLevelData: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_GetLevelData *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case PacketType_S2C_LevelData: {
-      auto ptr = reinterpret_cast<const PacketData::S2C_LevelData *>(obj);
+    case PacketPayload_S2C_GetLevelDataResponse: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_GetLevelDataResponse *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case PacketType_C2S_MonsterData: {
-      auto ptr = reinterpret_cast<const PacketData::C2S_MonsterData *>(obj);
+    case PacketPayload_C2S_GetMonsterData: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_GetMonsterData *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case PacketType_S2C_MonsterData: {
-      auto ptr = reinterpret_cast<const PacketData::S2C_MonsterData *>(obj);
+    case PacketPayload_S2C_GetMonsterDataResponse: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_GetMonsterDataResponse *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case PacketType_C2S_SessionData: {
-      auto ptr = reinterpret_cast<const PacketData::C2S_SessionData *>(obj);
+    case PacketPayload_C2S_GetMonsterInstanceData: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_GetMonsterInstanceData *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case PacketType_S2C_SessionData: {
-      auto ptr = reinterpret_cast<const PacketData::S2C_SessionData *>(obj);
+    case PacketPayload_S2C_GetMonsterInstanceDataResponse: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_GetMonsterInstanceDataResponse *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case PacketType_C2S_PlayerData: {
-      auto ptr = reinterpret_cast<const PacketData::C2S_PlayerData *>(obj);
+    case PacketPayload_C2S_CreateSession: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_CreateSession *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case PacketType_S2C_PlayerData: {
-      auto ptr = reinterpret_cast<const PacketData::S2C_PlayerData *>(obj);
+    case PacketPayload_S2C_CreateSessionResponse: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_CreateSessionResponse *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_C2S_JoinSession: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_JoinSession *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_S2C_JoinSessionResponse: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_JoinSessionResponse *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_C2S_LeaveSession: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_LeaveSession *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_S2C_UpdateSessionBroadcast: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_UpdateSessionBroadcast *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_C2S_GetPlayerData: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_GetPlayerData *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_S2C_GetPlayerDataResponse: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_GetPlayerDataResponse *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_C2S_UpdatePlayerState: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_UpdatePlayerState *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_S2C_UpdatePlayerStateBroadcast: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_UpdatePlayerStateBroadcast *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_C2S_UpdateCurPlayerState: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_UpdateCurPlayerState *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_S2C_UpdateCurPlayerStateBroadcast: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_UpdateCurPlayerStateBroadcast *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_C2S_DamageToMonster: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_DamageToMonster *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_S2C_DamageToMonsterBroadcast: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_DamageToMonsterBroadcast *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_C2S_DamageByMonster: {
+      auto ptr = reinterpret_cast<const PacketData::C2S_DamageByMonster *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case PacketPayload_S2C_DamageByMonsterBroadcast: {
+      auto ptr = reinterpret_cast<const PacketData::S2C_DamageByMonsterBroadcast *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;
   }
 }
 
-inline bool VerifyPacketTypeVector(::flatbuffers::Verifier &verifier, const ::flatbuffers::Vector<::flatbuffers::Offset<void>> *values, const ::flatbuffers::Vector<uint8_t> *types) {
+inline bool VerifyPacketPayloadVector(::flatbuffers::Verifier &verifier, const ::flatbuffers::Vector<::flatbuffers::Offset<void>> *values, const ::flatbuffers::Vector<uint8_t> *types) {
   if (!values || !types) return !values && !types;
   if (values->size() != types->size()) return false;
   for (::flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {
-    if (!VerifyPacketType(
-        verifier,  values->Get(i), types->GetEnum<PacketType>(i))) {
+    if (!VerifyPacketPayload(
+        verifier,  values->Get(i), types->GetEnum<PacketPayload>(i))) {
       return false;
     }
   }

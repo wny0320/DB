@@ -33,13 +33,34 @@ void BoostServer::HandleAccept(boost::shared_ptr<Session> NewSession, const boos
 {
     if (!ErrorCode)
     {
-        NewSession->Start(); // 접속 성공 시, 세션 로직 시작
+        // 1. 세션의 소켓 객체를 가져옵니다.
+        tcp::socket& socket = NewSession->GetSocket();
+
+        // 2. 소켓에 연결된 상대방(클라이언트)의 엔드포인트(IP주소+포트) 정보를 가져옵니다.
+        boost::system::error_code ec;
+        tcp::endpoint remote_ep = socket.remote_endpoint(ec);
+
+        if (!ec)
+        {
+            // 3. 성공적으로 정보를 가져왔다면, Session 객체에 IP 주소를 설정합니다.
+            std::string client_ip = remote_ep.address().to_string();
+            NewSession->SetClientIP(client_ip);
+
+            std::cout << "클라이언트 접속 성공. Session ID: " << NewSession->GetId() << ", IP: " << client_ip << std::endl;
+        }
+        else
+        {
+            std::cerr << "클라이언트 IP 주소 획득 실패: " << ec.message() << std::endl;
+        }
+
+        // 4. 세션의 비동기 읽기 시작
+        NewSession->Start();
     }
     else
     {
         std::cerr << "Accept Error: " << ErrorCode.message() << std::endl;
     }
 
-    // 다음 클라이언트의 접속을 받기 위해 다시 대기 상태로 들어갑니다.
+    // 다음 클라이언트의 접속을 기다립니다.
     StartAccept();
 }

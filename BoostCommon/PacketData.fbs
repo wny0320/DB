@@ -1,86 +1,201 @@
 namespace PacketData;
 
-struct PlayerStat{
-	max_hp: uint8;
-	cur_hp: uint8;
-	range: uint8;
-	max_stamina: uint8;
-	cur_stamina: uint8;
-	move_speed: uint8;
-}
-
 enum MonsterType : byte{
 	Test = 0,
 
 }
 
-struct MonsterStat{
+table MonsterInfo{
+	monster_index: uint8;
 	monster_type: MonsterType;
-	max_hp: uint8;
+	monster_name: string;
+	max_health: uint8;
+	cur_health: uint8;
 	damage: uint8;
 	move_speed: uint8;
 }
 
-struct Level{
+struct MapLevel{
 	step: uint8;
 	goal_money: uint32;
 	goal_round: uint8;
 }
 
-table C2S_LevelData{
+struct Color{
+	r: byte;
+	g: byte;
+	b: byte;
+}
+
+table PlayerInfo {
+	player_index: byte;
+    nickname: string;
+	color: Color;
+    max_health: uint8;
+    current_health: uint8;
+    grab_range: uint8;
+    max_stamina: uint8;
+    current_stamina: uint8;
+    move_speed: uint8;
+}
+
+table SessionInfo{
 	session_id: uint32;
+	ip_address: string;
 	step: uint8;
-}
-
-table S2C_LevelData{
-	level: Level;
-}
-
-table C2S_MonsterData{
-	monster_type: MonsterType;
-}
-
-table S2C_MonsterData{
-	monster_stat: MonsterStat;
-}
-
-table C2S_SessionData{
-	session_id: uint32;
-}
-
-table S2C_SessionData{
-	session_id: uint32;
-	step: uint8;
-	all_player_id: [uint32];
+	player_info: [PlayerInfo];
+	monster_info: [MonsterInfo];
 	usable_money: uint32;
 	now_round: uint8;
 }
 
-table C2S_PlayerData{
+table C2S_GetMonsterData{
+	monster_type: MonsterType;
+}
+
+table S2C_GetMonsterDataResponse{
+	monster_info: MonsterInfo;
+}
+
+table C2S_GetMonsterInstanceData{
+	monster_index: uint8;
+}
+
+table S2C_GetMonsterInstanceDataResponse{
+	monster_info: MonsterInfo;
+}
+
+table C2S_DamageToMonster{
+	player_index: uint8;
+	monster_index: uint8;
+	damage: uint8;
+}
+
+table S2C_DamageToMonsterBroadcast{
+	player_index: uint8;
+	monster_index: uint8;
+	monster_cur_hp: uint8;
+}
+
+table C2S_DamageByMonster{
+	player_index: uint8;
+	monster_index: uint8;
+	damage: uint8;
+}
+
+table S2C_DamageByMonsterBroadcast{
+	player_index: uint8;
+	monster_index: uint8;
+	player_cur_hp: uint8;
+}
+
+table C2S_UpdatePlayerState {
+    session_id: uint32;
+	player_index: byte;
+	player_info: PlayerInfo;
+}
+
+table S2C_UpdatePlayerStateBroadcast {
+    session_id: uint32;
+	player_index: byte;
+	player_info: PlayerInfo;
+}
+
+table C2S_UpdateCurPlayerState {
+    session_id: uint32;
+	player_index: byte;
+	current_health: uint8;
+	current_stamina: uint8;
+}
+
+table S2C_UpdateCurPlayerStateBroadcast {
+    session_id: uint32;
+	player_index: byte;
+	current_health: uint8;
+	current_stamina: uint8;
+}
+
+table C2S_GetPlayerData{
 	session_id: uint32;
-	player_id: uint32;
+	player_index: byte;
 }
 
-table S2C_PlayerData{
-	player_id: uint32;
-	player_stat: PlayerStat;
+table S2C_GetPlayerDataResponse{
+	player_index: byte;
+	player_info: PlayerInfo;
 }
 
-union PacketType{
-	C2S_LevelData,
-	S2C_LevelData,
-	C2S_MonsterData,
-	S2C_MonsterData,
-	C2S_SessionData,
-	S2C_SessionData,
-	C2S_PlayerData,
-	S2C_PlayerData,
+table C2S_GetLevelData{
+	session_id: uint32;
+	step: uint8;
+}
 
+table S2C_GetLevelDataResponse{
+	map_level: MapLevel;
+}
+
+table C2S_CreateSession{
+	host_nickname: string;
+	ip_address: string;
+}
+
+table S2C_CreateSessionResponse{
+	session_info: SessionInfo;
+}
+
+table S2C_UpdateSessionBroadcast{
+	session_info: SessionInfo;
+}
+
+table C2S_JoinSession{
+	session_id: uint32;
+	player_nickname: string;
+}
+
+table S2C_JoinSessionResponse{
+	player_index: byte;
+}
+
+table C2S_LeaveSession{
+	session_id: uint32;
+	player_index: byte;
+}
+
+union PacketPayload {
+    // 정적 데이터
+    C2S_GetLevelData,
+    S2C_GetLevelDataResponse,
+    C2S_GetMonsterData,
+    S2C_GetMonsterDataResponse,
+    C2S_GetMonsterInstanceData,
+    S2C_GetMonsterInstanceDataResponse,
+
+    // 세션 관리
+    C2S_CreateSession,
+    S2C_CreateSessionResponse,
+    C2S_JoinSession,
+    S2C_JoinSessionResponse,
+    C2S_LeaveSession,
+    S2C_UpdateSessionBroadcast,
+
+    // 플레이어 상태 동기화
+    C2S_GetPlayerData,
+    S2C_GetPlayerDataResponse,
+    C2S_UpdatePlayerState,
+    S2C_UpdatePlayerStateBroadcast,
+    C2S_UpdateCurPlayerState,
+    S2C_UpdateCurPlayerStateBroadcast,
+    
+    // 전투 로직
+    C2S_DamageToMonster,
+    S2C_DamageToMonsterBroadcast,
+    C2S_DamageByMonster,
+    S2C_DamageByMonsterBroadcast
 }
 
 table Packet{
 	timestamp: uint64;
-	type: PacketType;
+	packet_pay_load: PacketPayload;
 }
 
 root_type Packet;

@@ -145,7 +145,8 @@
       <AdditionalDependencies>mysqlcppconn.lib;libssl.lib;libcrypto.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)..\BoostCommon\MySQL Connector Cpp 9.3\lib64\*.dll" "$(OutDir)" /Y /I /D</Command>
+      <Command>xcopy "$(SolutionDir)..\BoostCommon\MySQL Connector Cpp 9.3\lib64\*.dll" "$(OutDir)" /Y /I /D
+xcopy "$(SolutionDir)..\BoostCommon\PacketData_generated.h" "C:\Work\SVN\Source\Multi\Woon\Network" /Y /I /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
