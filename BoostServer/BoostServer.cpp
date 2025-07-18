@@ -28,39 +28,51 @@ void BoostServer::StartAccept()
             boost::asio::placeholders::error));
 }
 
-// 비동기 접속 완료 콜백 함수 구현
 void BoostServer::HandleAccept(boost::shared_ptr<Session> NewSession, const boost::system::error_code& ErrorCode)
 {
+    // [디버그 로그 1] HandleAccept 함수가 호출되었는지 확인
+    std::cout << "[DEBUG] HandleAccept 진입." << std::endl;
+
     if (!ErrorCode)
     {
-        // 1. 세션의 소켓 객체를 가져옵니다.
-        tcp::socket& socket = NewSession->GetSocket();
+        // [디버그 로그 2] 접속 에러가 없음을 확인
+        std::cout << "[DEBUG] 접속 성공 (ErrorCode 없음). IP 주소 확인 시작..." << std::endl;
 
-        // 2. 소켓에 연결된 상대방(클라이언트)의 엔드포인트(IP주소+포트) 정보를 가져옵니다.
-        boost::system::error_code ec;
-        tcp::endpoint remote_ep = socket.remote_endpoint(ec);
-
-        if (!ec)
+        // 클라이언트의 IP 주소를 획득하고 Session 객체에 설정합니다.
+        try
         {
-            // 3. 성공적으로 정보를 가져왔다면, Session 객체에 IP 주소를 설정합니다.
-            std::string client_ip = remote_ep.address().to_string();
-            NewSession->SetClientIP(client_ip);
+            tcp::socket& socket = NewSession->GetSocket();
+            boost::system::error_code ec;
+            tcp::endpoint remote_ep = socket.remote_endpoint(ec);
 
-            std::cout << "클라이언트 접속 성공. Session ID: " << NewSession->GetId() << ", IP: " << client_ip << std::endl;
+            if (!ec)
+            {
+                std::string client_ip = remote_ep.address().to_string();
+                NewSession->SetClientIP(client_ip);
+                std::cout << "[DEBUG] IP 주소 획득 성공: " << client_ip << std::endl;
+            }
+            else
+            {
+                // IP 주소 획득에 실패하더라도 세션은 시작해야 합니다.
+                NewSession->SetClientIP("0.0.0.0"); // 실패 시 기본값 설정
+                std::cerr << "[DEBUG] IP 주소 획득 실패: " << ec.message() << std::endl;
+            }
         }
-        else
+        catch (const std::exception& e)
         {
-            std::cerr << "클라이언트 IP 주소 획득 실패: " << ec.message() << std::endl;
+            std::cerr << "[DEBUG] IP 주소 획득 중 예외 발생: " << e.what() << std::endl;
         }
 
-        // 4. 세션의 비동기 읽기 시작
+        // [디버그 로그 3] Session::Start() 호출 직전인지 확인
+        std::cout << "[DEBUG] Session::Start() 호출 준비..." << std::endl;
         NewSession->Start();
     }
     else
     {
+        // 접속 자체에 실패한 경우 (예: 서버 리소스 부족)
         std::cerr << "Accept Error: " << ErrorCode.message() << std::endl;
     }
 
-    // 다음 클라이언트의 접속을 기다립니다.
+    // 다음 클라이언트의 접속을 받기 위해 다시 대기 상태로 들어갑니다.
     StartAccept();
 }
