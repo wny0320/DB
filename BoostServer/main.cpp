@@ -7,11 +7,21 @@
 // 생성된 FlatBuffer 헤더 파일
 #include "PacketData_generated.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #define SERVER_PORT 32124
 #define THREAD_POOL_SIZE 4
 
 int main()
 {
+#ifdef _WIN32
+    // Windows 콘솔의 출력 인코딩을 UTF-8로 설정합니다.
+    SetConsoleOutputCP(CP_UTF8);
+    // Windows 콘솔의 입력 인코딩도 UTF-8로 설정합니다. (선택 사항)
+    // SetConsoleCP(CP_UTF8);
+#endif
     try
     {
         // 1. DB 연결을 먼저 시도합니다.
